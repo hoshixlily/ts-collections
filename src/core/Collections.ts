@@ -3,7 +3,8 @@ import { IList } from "../list/IList";
 import { List } from "../list/List";
 import { Comparators } from "../shared/Comparators";
 import { EqualityComparator } from "../shared/EqualityComparator";
-import { ErrorMessages } from "../shared/ErrorMessages";
+import { IndexOutOfBoundsException } from "../shared/IndexOutOfBoundsException";
+import { NoElementsException } from "../shared/NoElementsException";
 import { OrderComparator } from "../shared/OrderComparator";
 import { Selector } from "../shared/Selector";
 import { ICollection } from "./ICollection";
@@ -133,7 +134,7 @@ export abstract class Collections {
         let iteratorItem = iterator.next();
         let maxItem: TElement;
         if (iteratorItem.done) {
-            throw new Error(ErrorMessages.NoElements);
+            throw new NoElementsException();
         }
         maxItem = iteratorItem.value;
         while (!iteratorItem.done) {
@@ -163,7 +164,7 @@ export abstract class Collections {
         let iteratorItem = iterator.next();
         let minItem: TElement;
         if (iteratorItem.done) {
-            throw new Error(ErrorMessages.NoElements);
+            throw new NoElementsException();
         }
         minItem = iteratorItem.value;
         while (!iteratorItem.done) {
@@ -251,8 +252,10 @@ export abstract class Collections {
      */
     public static swap<TElement>(sequence: IList<TElement> | Array<TElement>, firstIndex: number, secondIndex: number): void {
         const size = sequence instanceof Array ? sequence.length : sequence.size();
-        if (firstIndex < 0 || firstIndex >= size || secondIndex < 0 || secondIndex >= size) {
-            throw new Error(ErrorMessages.IndexOutOfBoundsException);
+        if (firstIndex < 0 || firstIndex >= size) {
+            throw new IndexOutOfBoundsException(firstIndex);
+        } else if (secondIndex < 0 || secondIndex >= size) {
+            throw new IndexOutOfBoundsException(secondIndex);
         }
         if (sequence instanceof Array) {
             [sequence[firstIndex], sequence[secondIndex]] = [sequence[secondIndex], sequence[firstIndex]];

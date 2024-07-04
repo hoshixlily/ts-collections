@@ -14,6 +14,7 @@ import {
 import { List } from "../../src/list/List";
 import { EqualityComparator } from "../../src/shared/EqualityComparator";
 import { ErrorMessages } from "../../src/shared/ErrorMessages";
+import { NoElementsException } from "../../src/shared/NoElementsException";
 import { Helper } from "../helpers/Helper";
 import { Person } from "../models/Person";
 import { School } from "../models/School";
@@ -62,7 +63,7 @@ describe("Dictionary", () => {
             expect(result).to.eq(99);
         });
         test("should throw error if dictionary is empty and no seed is provided", () => {
-            expect(() => dictionary.aggregate<number>((total, next) => total + next.key)).to.throw(ErrorMessages.NoElements);
+            expect(() => dictionary.aggregate<number>((total, next) => total + next.key)).toThrow(new NoElementsException());
         });
     });
 
@@ -141,7 +142,7 @@ describe("Dictionary", () => {
         });
         test("should throw error if dictionary is empty", () => {
             dict.clear();
-            expect(() => dict.average(p => p.value)).to.throw(ErrorMessages.NoElements);
+            expect(() => dict.average(p => p.value)).toThrow(new NoElementsException());
         });
     });
 
@@ -424,7 +425,7 @@ describe("Dictionary", () => {
         dictionary.add(Person.Priscilla.name, Person.Priscilla);
         test("should throw error if dictionary is empty()", () => {
             const dict = new Dictionary<number, number>();
-            expect(() => dict.first()).to.throw(ErrorMessages.NoElements);
+            expect(() => dict.first()).toThrow(new NoElementsException());
         });
         test("should return the first element if no predicate is provided", () => {
             const first = dictionary.first();
@@ -673,7 +674,7 @@ describe("Dictionary", () => {
         dictionary.add(Person.Noemi.name, Person.Noemi);
         test("should throw error if dictionary is empty()", () => {
             const dict = new Dictionary<number, number>();
-            expect(() => dict.last()).to.throw(ErrorMessages.NoElements);
+            expect(() => dict.last()).toThrow(new NoElementsException());
         });
         test("should return the last element if no predicate is provided", () => {
             const last = dictionary.last();
@@ -727,7 +728,7 @@ describe("Dictionary", () => {
         });
         test("should throw error if dictionary has no elements", () => {
             dictionary.clear();
-            expect(() => dictionary.max()).to.throw(ErrorMessages.NoElements);
+            expect(() => dictionary.max()).toThrow(new NoElementsException());
         });
     });
 
@@ -743,7 +744,7 @@ describe("Dictionary", () => {
         });
         test("should throw error if dictionary has no elements", () => {
             dictionary.clear();
-            expect(() => dictionary.min()).to.throw(ErrorMessages.NoElements);
+            expect(() => dictionary.min()).toThrow(new NoElementsException());
         });
     });
 
@@ -1044,7 +1045,7 @@ describe("Dictionary", () => {
     describe("#single", () => {
         test("should throw error if dictionary is empty", () => {
             const dict = new Dictionary();
-            expect(() => dict.single()).to.throw(ErrorMessages.NoElements);
+            expect(() => dict.single()).toThrow(new NoElementsException());
         });
         test("should throw error if dictionary has more than one elements and no predicate is provided", () => {
             const dict = new Dictionary<number, string>();
@@ -1210,7 +1211,7 @@ describe("Dictionary", () => {
         });
         test("should throw error if dictionary is empty", () => {
             dict.clear();
-            expect(() => dict.sum()).to.throw(ErrorMessages.NoElements);
+            expect(() => dict.sum()).toThrow(new NoElementsException());
         });
     })
 
