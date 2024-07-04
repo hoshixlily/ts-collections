@@ -32,6 +32,7 @@ import { IndexOutOfBoundsException } from "../shared/IndexOutOfBoundsException";
 import { InferredType } from "../shared/InferredType";
 import { JoinSelector } from "../shared/JoinSelector";
 import { NoElementsException } from "../shared/NoElementsException";
+import { NoMatchingElementException } from "../shared/NoMatchingElementException";
 import { ClassType, ObjectType } from "../shared/ObjectType";
 import { OrderComparator } from "../shared/OrderComparator";
 import { PairwiseSelector } from "../shared/PairwiseSelector";
@@ -200,7 +201,7 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
         }
         const item = this.firstOrDefault(predicate);
         if (!item) {
-            throw new Error(ErrorMessages.NoMatchingElement);
+            throw new NoMatchingElementException();
         }
         return item;
     }
@@ -264,7 +265,7 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
             }
         }
         if (!last) {
-            throw new Error(ErrorMessages.NoMatchingElement);
+            throw new NoMatchingElementException();
         }
         return last;
     }
@@ -434,7 +435,7 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
             }
         }
         if (index === 0 || single == null) {
-            throw new Error(ErrorMessages.NoMatchingElement);
+            throw new NoMatchingElementException();
         }
         return single;
     }

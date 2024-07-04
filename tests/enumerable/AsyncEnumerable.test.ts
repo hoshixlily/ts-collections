@@ -1,8 +1,11 @@
 import { AsyncEnumerable } from "../../src/enumerator/AsyncEnumerable";
 import { Enumerable, List } from "../../src/imports";
-import { ErrorMessages } from "../../src/shared/ErrorMessages";
 import { IndexOutOfBoundsException } from "../../src/shared/IndexOutOfBoundsException";
+import { InvalidArgumentException } from "../../src/shared/InvalidArgumentException";
+import { MoreThanOneElementException } from "../../src/shared/MoreThanOneElementException";
+import { MoreThanOneMatchingElementException } from "../../src/shared/MoreThanOneMatchingElementException";
 import { NoElementsException } from "../../src/shared/NoElementsException";
+import { NoMatchingElementException } from "../../src/shared/NoMatchingElementException";
 import { Helper } from "../helpers/Helper";
 import { Pair } from "../models/Pair";
 import { Person } from "../models/Person";
@@ -176,7 +179,7 @@ describe("AsyncEnumerable", () => {
         }, {timeout: 5000});
         test("should throw an error if the chunk size is less than 1", async () => {
             const enumerable = new AsyncEnumerable(numberProducer(10));
-            expect(() => enumerable.chunk(0)).to.throw(ErrorMessages.InvalidChunkSize);
+            expect(() => enumerable.chunk(0)).toThrow(new InvalidArgumentException("Invalid argument: size. Size must be greater than 0."));
         }, {timeout: 5000});
     });
 
@@ -368,7 +371,7 @@ describe("AsyncEnumerable", () => {
         });
         test("should throw an error if no elements satisfy the predicate", async () => {
             const enumerable = new AsyncEnumerable(numberProducer(10));
-            expect(enumerable.first(n => n > 10)).rejects.toThrowError(ErrorMessages.NoMatchingElement);
+            expect(enumerable.first(n => n > 10)).rejects.toThrowError(new NoMatchingElementException());
         });
     });
 
@@ -676,7 +679,7 @@ describe("AsyncEnumerable", () => {
         });
         test("should throw error if no element satisfies the predicate", async () => {
             const enumerable = new AsyncEnumerable(numberProducer(10));
-            expect(enumerable.last(n => n > 10)).rejects.toThrowError(ErrorMessages.NoMatchingElement);
+            expect(enumerable.last(n => n > 10)).rejects.toThrowError(new NoMatchingElementException());
         });
         test("should throw error if no element is present", async () => {
             const enumerable = new AsyncEnumerable(numberProducer(0));
@@ -965,11 +968,11 @@ describe("AsyncEnumerable", () => {
         });
         test("should throw error when enumerable has more than one element and no predicate is provided", async () => {
             const enumerable = new AsyncEnumerable(arrayProducer([1, 2]));
-            expect(enumerable.single()).rejects.toThrowError(ErrorMessages.MoreThanOneElement);
+            expect(enumerable.single()).rejects.toThrowError(new MoreThanOneElementException());
         });
         test("should throw error if no element matches the predicate", async () => {
             const enumerable = new AsyncEnumerable(arrayProducer([1, 2, 3, 4, 5]));
-            expect(enumerable.single(n => n > 5)).rejects.toThrowError(ErrorMessages.NoMatchingElement);
+            expect(enumerable.single(n => n > 5)).rejects.toThrowError(new NoMatchingElementException());
         });
         test("should throw if enumerable is empty", async () => {
             const enumerable = new AsyncEnumerable(arrayProducer([]));
@@ -1005,15 +1008,15 @@ describe("AsyncEnumerable", () => {
         });
         test("should throw error when enumerable has more than one element and no predicate is provided", async () => {
             const enumerable = new AsyncEnumerable(arrayProducer([1, 2]));
-            expect(enumerable.singleOrDefault()).rejects.toThrowError(ErrorMessages.MoreThanOneElement);
+            expect(enumerable.singleOrDefault()).rejects.toThrowError(new MoreThanOneElementException());
         });
         test("should throw error if more than one element", async () => {
             const enumerable = new AsyncEnumerable(arrayProducer([1, 2, 3, 4, 4]));
-            expect(enumerable.singleOrDefault(n => n === 4)).rejects.toThrowError(ErrorMessages.MoreThanOneMatchingElement);
+            expect(enumerable.singleOrDefault(n => n === 4)).rejects.toThrowError(new MoreThanOneMatchingElementException());
         });
         test("should throw error if more than one element that matches the predicate", async () => {
             const enumerable = new AsyncEnumerable(arrayProducer([1, 2, 3, 4]));
-            expect(enumerable.singleOrDefault(n => n % 2 === 0)).rejects.toThrowError(ErrorMessages.MoreThanOneMatchingElement);
+            expect(enumerable.singleOrDefault(n => n % 2 === 0)).rejects.toThrowError(new MoreThanOneMatchingElementException());
         });
     });
 
