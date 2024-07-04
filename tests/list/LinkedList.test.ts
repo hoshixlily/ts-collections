@@ -1,9 +1,11 @@
 import { Enumerable, LinkedList } from "../../src/imports";
 import { EqualityComparator } from "../../src/shared/EqualityComparator";
-import { ErrorMessages } from "../../src/shared/ErrorMessages";
 import { IndexOutOfBoundsException } from "../../src/shared/IndexOutOfBoundsException";
 import { InvalidArgumentException } from "../../src/shared/InvalidArgumentException";
+import { MoreThanOneElementException } from "../../src/shared/MoreThanOneElementException";
+import { MoreThanOneMatchingElementException } from "../../src/shared/MoreThanOneMatchingElementException";
 import { NoElementsException } from "../../src/shared/NoElementsException";
+import { NoMatchingElementException } from "../../src/shared/NoMatchingElementException";
 import { Pair } from "../models/Pair";
 import { Person } from "../models/Person";
 import { School } from "../models/School";
@@ -394,7 +396,7 @@ describe("LinkedList", () => {
         });
         test("should throw an error if no matching element is found.", () => {
             const list = new LinkedList([99, 2, 3, 4, 5]);
-            expect(() => list.first(n => n < 0)).to.throw(ErrorMessages.NoMatchingElement);
+            expect(() => list.first(n => n < 0)).toThrowError(new NoMatchingElementException());
         });
         test("should return a person with name 'Alice'", () => {
             const list = new LinkedList([Person.Mel, Person.Alice, Person.Jane]);
@@ -638,7 +640,7 @@ describe("LinkedList", () => {
         });
         test("should throw an error if no matching element is found.", () => {
             const list = new LinkedList([99, 2, 3, 4, 5]);
-            expect(() => list.last(n => n < 0)).to.throw(ErrorMessages.NoMatchingElement);
+            expect(() => list.last(n => n < 0)).toThrowError(new NoMatchingElementException());
         });
         test("should return 87", () => {
             const list = new LinkedList([9, 34, 65, 92, 87, 435, 3, 54, 83, 23, 87, 67, 12, 19]);
@@ -1049,7 +1051,7 @@ describe("LinkedList", () => {
             list.add(Person.Alice);
             list.add(Person.Senna);
             list.add(Person.Jane);
-            expect(() => list.single()).to.throw(ErrorMessages.MoreThanOneElement);
+            expect(() => list.single()).toThrowError(new MoreThanOneElementException());
         });
         test("should return the only element in the list", () => {
             const list = new LinkedList();
@@ -1062,7 +1064,7 @@ describe("LinkedList", () => {
             list.add(Person.Alice);
             list.add(Person.Senna);
             list.add(Person.Jane);
-            expect(() => list.single(p => p.name === "Lenka")).to.throw(ErrorMessages.NoMatchingElement);
+            expect(() => list.single(p => p.name === "Lenka")).toThrowError(new NoMatchingElementException());
         });
         test("should throw error if more than one matching element is found.", () => {
             const list = new LinkedList<Person>();
@@ -1070,7 +1072,7 @@ describe("LinkedList", () => {
             list.add(Person.Senna);
             list.add(Person.Jane);
             list.add(Person.Senna);
-            expect(() => list.single(p => p.name === "Senna")).to.throw(ErrorMessages.MoreThanOneMatchingElement);
+            expect(() => list.single(p => p.name === "Senna")).toThrowError(new MoreThanOneMatchingElementException());
         });
         test("should return person with name 'Alice'.", () => {
             const list = new LinkedList<Person>();
@@ -1099,9 +1101,9 @@ describe("LinkedList", () => {
             const item = list.singleOrDefault(n => n === 3);
             expect(item).to.eq(3);
         });
-        test(`should throw error [${ErrorMessages.MoreThanOneMatchingElement}]`, () => {
+        test(`should throw error`, () => {
             list.add(3);
-            expect(() => list.singleOrDefault(n => n === 3)).to.throw(ErrorMessages.MoreThanOneMatchingElement);
+            expect(() => list.singleOrDefault(n => n === 3)).toThrowError(new MoreThanOneMatchingElementException());
         });
         test("should return the only element in the list", () => {
             const list2 = new LinkedList<string>();
@@ -1109,11 +1111,11 @@ describe("LinkedList", () => {
             const sod = list2.singleOrDefault();
             expect(sod).to.eq("Suzuha");
         });
-        test(`should throw error [${ErrorMessages.MoreThanOneElement}]`, () => {
+        test(`should throw error`, () => {
             const list2 = new LinkedList<string>();
             list2.add("Suzuha");
             list2.add("Suzuri");
-            expect(() => list2.singleOrDefault()).to.throw(ErrorMessages.MoreThanOneElement);
+            expect(() => list2.singleOrDefault()).toThrowError(new MoreThanOneElementException());
         });
         test("should return default value [null] if no matching element is found.", () => {
             const sod = list.singleOrDefault(n => n < 0);

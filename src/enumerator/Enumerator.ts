@@ -24,13 +24,15 @@ import { Lookup } from "../lookup/Lookup";
 import { Accumulator } from "../shared/Accumulator";
 import { Comparators } from "../shared/Comparators";
 import { EqualityComparator } from "../shared/EqualityComparator";
-import { ErrorMessages } from "../shared/ErrorMessages";
 import { IndexedAction } from "../shared/IndexedAction";
 import { IndexedPredicate } from "../shared/IndexedPredicate";
 import { IndexedSelector } from "../shared/IndexedSelector";
 import { IndexOutOfBoundsException } from "../shared/IndexOutOfBoundsException";
 import { InferredType } from "../shared/InferredType";
+import { InvalidArgumentException } from "../shared/InvalidArgumentException";
 import { JoinSelector } from "../shared/JoinSelector";
+import { MoreThanOneElementException } from "../shared/MoreThanOneElementException";
+import { MoreThanOneMatchingElementException } from "../shared/MoreThanOneMatchingElementException";
 import { NoElementsException } from "../shared/NoElementsException";
 import { NoMatchingElementException } from "../shared/NoMatchingElementException";
 import { ClassType, ObjectType } from "../shared/ObjectType";
@@ -120,7 +122,7 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
 
     public chunk(size: number): IEnumerable<IEnumerable<TElement>> {
         if (size < 1) {
-            throw new Error(ErrorMessages.InvalidChunkSize);
+            throw new InvalidArgumentException("Size must be greater than 0.", "size");
         }
         return new Enumerator(() => this.chunkGenerator(size));
     }
@@ -413,7 +415,7 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
             }
             for (const item of this) {
                 if (index !== 0) {
-                    throw new Error(ErrorMessages.MoreThanOneElement);
+                    throw new MoreThanOneElementException();
                 } else {
                     single = item;
                     index++;
@@ -426,7 +428,7 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
             for (const item of this) {
                 if (predicate(item)) {
                     if (index !== 0) {
-                        throw new Error(ErrorMessages.MoreThanOneMatchingElement);
+                        throw new MoreThanOneMatchingElementException();
                     } else {
                         single = item;
                         index++;
@@ -446,7 +448,7 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
         if (!predicate) {
             for (const item of this) {
                 if (index !== 0) {
-                    throw new Error(ErrorMessages.MoreThanOneElement);
+                    throw new MoreThanOneElementException();
                 } else {
                     single = item;
                     index++;
@@ -457,7 +459,7 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
             for (const item of this) {
                 if (predicate(item)) {
                     if (index !== 0) {
-                        throw new Error(ErrorMessages.MoreThanOneMatchingElement);
+                        throw new MoreThanOneMatchingElementException();
                     } else {
                         single = item;
                         index++;

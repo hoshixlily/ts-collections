@@ -73,7 +73,6 @@ export abstract class Collections {
      *                 then the item itself will be used as the key.
      * @param {Function} comparator A method that will be used to compare the equality of the selector keys.
      * @return An array of distinct items.
-     * @throws An error if the iterable is null or undefined.
      */
     public static distinct<TElement, TKey>(iterable: Iterable<TElement>, selector?: Selector<TElement, TKey>, comparator?: EqualityComparator<TKey>): IEnumerable<TElement> {
         selector ??= (item: TElement) => item as unknown as TKey;
@@ -127,7 +126,7 @@ export abstract class Collections {
      * @param {Iterable} iterable The data source
      * @param {Function} selector A selector method which will return a key that will be used for comparison.
      * @return The item which has the maximum value according to the selector method, or null if iterable is empty.
-     * @throws An exception if iterable is null or undefined.
+     * @throws {NoElementsException} If the iterable is empty.
      */
     public static max<TElement>(iterable: Iterable<TElement>, selector?: Selector<TElement, number>): TElement {
         const iterator = iterable[Symbol.iterator]();
@@ -157,7 +156,7 @@ export abstract class Collections {
      * @param {Iterable} iterable The data source
      * @param {Function} selector A selector method which will return a key that will be used for comparison.
      * @return The item which has the minimum value according to the selector method, or null if iterable is empty.
-     * @throws An exception if iterable is null or undefined.
+     * @throws {NoElementsException} If the iterable is empty.
      */
     public static min<TElement>(iterable: Iterable<TElement>, selector?: Selector<TElement, number>): TElement {
         const iterator = iterable[Symbol.iterator]();
@@ -248,7 +247,7 @@ export abstract class Collections {
      * @param {IList|Array} sequence The list or array whose two elements will be swapped
      * @param {number} firstIndex The first index of the swap operation
      * @param {number} secondIndex The second index of the swap operation
-     * @throws {Error} IndexOutOfBoundsException if the given indices are out of bounds.
+     * @throws {IndexOutOfBoundsException} If the given indices are out of bounds.
      */
     public static swap<TElement>(sequence: IList<TElement> | Array<TElement>, firstIndex: number, secondIndex: number): void {
         const size = sequence instanceof Array ? sequence.length : sequence.size();
