@@ -294,6 +294,14 @@ export interface IEnumerable<TElement> extends Iterable<TElement> {
     min(selector?: Selector<TElement, number>): number;
 
     /**
+     * Determines whether no elements of the sequence satisfy the specified predicate.
+     * If no predicate is specified, it will return true if the sequence is empty.
+     * @param predicate The predicate function that will be used to check each element for a condition.
+     * @returns {boolean} true if no elements of the sequence satisfy the specified predicate; otherwise, false.
+     */
+    none(predicate?: Predicate<TElement>): boolean;
+
+    /**
      * Returns the elements that are of the specified type.
      * The type can be specified either as a constructor function or as a string.
      * @example

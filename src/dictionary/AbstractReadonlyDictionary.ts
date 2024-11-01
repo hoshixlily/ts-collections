@@ -179,6 +179,10 @@ export abstract class AbstractReadonlyDictionary<TKey, TValue> implements IReado
         return EnumerableStatic.min(this, selector);
     }
 
+    public none(predicate?: Predicate<KeyValuePair<TKey, TValue>>): boolean {
+        return EnumerableStatic.none(this, predicate);
+    }
+
     public ofType<TResult extends ObjectType>(type: TResult): IEnumerable<InferredType<TResult>> {
         return EnumerableStatic.ofType(this, type);
     }

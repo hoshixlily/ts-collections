@@ -204,6 +204,10 @@ export class Enumerable<TElement> implements IEnumerable<TElement> {
         return this.#enumerator.min(selector);
     }
 
+    public none(predicate?: Predicate<TElement>): boolean {
+        return this.#enumerator.none(predicate);
+    }
+
     public ofType<TResult extends ObjectType>(type: TResult): IEnumerable<InferredType<TResult>> {
         return this.#enumerator.ofType(type);
     }

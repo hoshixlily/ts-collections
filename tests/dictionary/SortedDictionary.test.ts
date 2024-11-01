@@ -711,19 +711,38 @@ describe("SortedDictionary", () => {
         });
     });
 
+    describe("#none()", () => {
+        const dictionary = new SortedDictionary<string, Person>();
+        dictionary.add(Person.Lucrezia.name, Person.Lucrezia);
+        dictionary.add(Person.Priscilla.name, Person.Priscilla);
+        test("should return true if no element satisfies the condition", () => {
+            const none = dictionary.none(p => p.value.name === "Suzuha");
+            expect(none).to.eq(true);
+        });
+        test("should return false if any element satisfies the condition", () => {
+            const none = dictionary.none(p => p.value.name === "Lucrezia");
+            expect(none).to.eq(false);
+        });
+        test("should return true if dictionary is empty and predicate is provided", () => {
+            const dict2 = new SortedDictionary<number, number>();
+            const none = dict2.none();
+            expect(none).to.eq(true);
+        });
+        test("should return false if dictionary is not empty and predicate is not provided", () => {
+            const none = dictionary.none();
+            expect(none).to.eq(false);
+        });
+    });
+
     describe("#orderBy()", () => {
         test("should order dictionary by key [asc]", () => {
             const dictionary = new SortedDictionary<string, Person>();
-            dictionary.add(Person.Lucrezia.name, Person.Lucrezia);
-            dictionary.add(Person.Alice.name, Person.Alice);
-            dictionary.add(Person.Priscilla.name, Person.Priscilla);
-            dictionary.add(Person.Noemi.name, Person.Noemi);
+            dictionary.add(Person.Reina.name, Person.Reina);
+            dictionary.add(Person.Rui.name, Person.Rui);
             const orderedArray = dictionary.orderBy(p => p.key).toArray();
             const expectedResult = [
-                new KeyValuePair<string, Person>(Person.Alice.name, Person.Alice),
-                new KeyValuePair<string, Person>(Person.Lucrezia.name, Person.Lucrezia),
-                new KeyValuePair<string, Person>(Person.Noemi.name, Person.Noemi),
-                new KeyValuePair<string, Person>(Person.Priscilla.name, Person.Priscilla)
+                new KeyValuePair<string, Person>(Person.Reina.name, Person.Reina),
+                new KeyValuePair<string, Person>(Person.Rui.name, Person.Rui),
             ];
             let index = 0;
             for (const item of orderedArray) {

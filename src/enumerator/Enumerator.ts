@@ -335,6 +335,18 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
         }
     }
 
+    public none(predicate?: Predicate<TElement>): boolean {
+        if (!predicate) {
+            return !!this[Symbol.iterator]().next().done;
+        }
+        for (const d of this) {
+            if (predicate(d)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public ofType<TResult extends ObjectType>(type: TResult): IEnumerable<InferredType<TResult>> {
         return new Enumerator<InferredType<TResult>>(() => this.ofTypeGenerator(type));
     }

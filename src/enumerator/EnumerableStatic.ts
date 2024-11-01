@@ -149,6 +149,10 @@ export abstract class EnumerableStatic {
         return new Enumerable(source).min(selector);
     }
 
+    public static none<TElement>(source: IEnumerable<TElement>, predicate?: Predicate<TElement>): boolean {
+        return new Enumerable(source).none(predicate);
+    }
+
     public static ofType<TElement, TResult extends ObjectType>(source: IEnumerable<TElement>, type: TResult): IEnumerable<InferredType<TResult>> {
         return new Enumerable<TElement>(source).ofType<TResult>(type);
     }

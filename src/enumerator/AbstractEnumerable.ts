@@ -158,6 +158,10 @@ export abstract class AbstractEnumerable<TElement> implements IEnumerable<TEleme
         return EnumerableStatic.min(this, selector);
     }
 
+    public none(predicate?: Predicate<TElement>): boolean {
+        return EnumerableStatic.none(this, predicate);
+    }
+
     public ofType<TResult extends ObjectType>(type: TResult): IEnumerable<InferredType<TResult>> {
         return EnumerableStatic.ofType(this, type);
     }

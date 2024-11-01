@@ -198,6 +198,10 @@ export class Lookup<TKey, TElement> implements ILookup<TKey, TElement> {
         return this.#lookupTree.min(selector);
     }
 
+    public none(predicate?: Predicate<IGroup<TKey, TElement>>): boolean {
+        return this.#lookupTree.none(predicate);
+    }
+
     public ofType<TResult extends ObjectType>(type: TResult): IEnumerable<InferredType<TResult>> {
         return this.#lookupTree.ofType<TResult>(type);
     }

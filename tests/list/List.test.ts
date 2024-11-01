@@ -840,6 +840,29 @@ describe("List", () => {
         });
     });
 
+    describe("#none()", () => {
+        test("should return true if list is empty", () => {
+            const list = new List<number>();
+            expect(list.none(n => n > 1)).to.true;
+        });
+        test("should return true if no element matches the predicate", () => {
+            const list = new List([1, 2, 3, 4, 5]);
+            expect(list.none(n => n > 5)).to.true;
+        });
+        test("should return false if an element matches the predicate", () => {
+            const list = new List([1, 2, 3, 4, 5]);
+            expect(list.none(n => n === 3)).to.false;
+        });
+        test("should return true if list is empty and no predicate is provided", () => {
+            const list = new List<number>();
+            expect(list.none()).to.true;
+        });
+        test("should return false if list is not empty and no predicate is provided", () => {
+            const list = new List([1, 2, 3, 4, 5]);
+            expect(list.none()).to.false;
+        });
+    });
+
     describe("#ofType()", () => {
         const symbol = Symbol("test");
         const object = new Object(100);
