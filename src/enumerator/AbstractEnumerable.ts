@@ -340,6 +340,10 @@ export abstract class AbstractEnumerable<TElement> implements IEnumerable<TEleme
         return EnumerableStatic.where(this, predicate);
     }
 
+    public windows(size: number): IEnumerable<IEnumerable<TElement>> {
+        return EnumerableStatic.windows(this, size);
+    }
+
     public zip<TSecond>(iterable: Iterable<TSecond>): IEnumerable<[TElement, TSecond]>;
     public zip<TSecond, TResult = [TElement, TSecond]>(iterable: Iterable<TSecond>, zipper?: Zipper<TElement, TSecond, TResult>): IEnumerable<TResult>;
     public zip<TSecond, TResult = [TElement, TSecond]>(iterable: Iterable<TSecond>, zipper?: Zipper<TElement, TSecond, TResult>): IEnumerable<[TElement, TSecond]> | IEnumerable<TResult> {

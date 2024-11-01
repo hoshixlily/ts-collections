@@ -325,6 +325,10 @@ export abstract class EnumerableStatic {
         return new Enumerable(source).where(predicate);
     }
 
+    public static windows<TElement>(source: IEnumerable<TElement>, size: number): IEnumerable<IEnumerable<TElement>> {
+        return new Enumerable(source).windows(size);
+    }
+
     public static zip<TElement, TSecond, TResult = [TElement, TSecond]>(source: IEnumerable<TElement>, other: Iterable<TSecond>, zipper?: Zipper<TElement, TSecond, TResult>): IEnumerable<[TElement, TSecond]> | IEnumerable<TResult> {
         return new Enumerable(source).zip(other, zipper);
     }

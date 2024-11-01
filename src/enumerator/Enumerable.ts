@@ -380,6 +380,10 @@ export class Enumerable<TElement> implements IEnumerable<TElement> {
         return this.#enumerator.where(predicate);
     }
 
+    public windows(size: number): IEnumerable<IEnumerable<TElement>> {
+        return this.#enumerator.windows(size);
+    }
+
     public zip<TSecond, TResult = [TElement, TSecond]>(iterable: Iterable<TSecond>, zipper?: Zipper<TElement, TSecond, TResult>): IEnumerable<[TElement, TSecond]> | IEnumerable<TResult> {
         return this.#enumerator.zip(iterable, zipper);
     }

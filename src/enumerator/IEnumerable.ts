@@ -698,6 +698,30 @@ export interface IEnumerable<TElement> extends Iterable<TElement> {
     where(predicate: IndexedPredicate<TElement>): IEnumerable<TElement>;
 
     /**
+     * Returns an enumerable sequence of windows of the specified size.
+     * If the size is less than or equal to 0, an error will be thrown.
+     * If the size is greater than the number of elements in the sequence, an empty sequence will be returned.
+     *
+     * The windows will overlap, meaning that each element will be included in multiple windows.
+     *
+     * Example:
+     * ```typescript
+     *   const numberList = new List([1, 2, 3, 4, 5]);
+     *   const result = numberList.windows(3).toArray(); // [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
+     *   const result2 = numberList.windows(1).toArray(); // [[1], [2], [3], [4], [5]]
+     *   const result3 = numberList.windows(5).toArray(); // [[1, 2, 3, 4, 5]]
+     *   const result4 = numberList.windows(6).toArray(); // []
+     *   const result5 = numberList.windows(0).toArray(); // Error
+     *   const result6 = numberList.windows(-1).toArray(); // Error
+     * ```
+     * @template TElement
+     * @param size The size of the windows.
+     * @returns {IEnumerable<IEnumerable<TElement>>} A new enumerable sequence that contains the specified number of elements from the start of the input sequence.
+     * @throws {InvalidArgumentException} If size is less than or equal to 0.
+     */
+    windows(size: number): IEnumerable<IEnumerable<TElement>>;
+
+    /**
      * Applies a specified function to the corresponding elements of two sequences, producing a sequence of the results.
      * @template TElement
      * @template TSecond

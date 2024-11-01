@@ -381,6 +381,10 @@ export class Lookup<TKey, TElement> implements ILookup<TKey, TElement> {
         return this.#lookupTree.where(predicate);
     }
 
+    public windows(size: number): IEnumerable<IEnumerable<IGroup<TKey, TElement>>> {
+        return this.#lookupTree.windows(size);
+    }
+
     public zip<TSecond, TResult = [IGroup<TKey, TElement>, TSecond]>(iterable: Iterable<TSecond>, zipper?: Zipper<IGroup<TKey, TElement>, TSecond, TResult>): IEnumerable<[IGroup<TKey, TElement>, TSecond]> | IEnumerable<TResult> {
         return this.#lookupTree.zip(iterable, zipper);
     }

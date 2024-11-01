@@ -1989,6 +1989,39 @@ describe("List", () => {
         });
     });
 
+    describe("#windows()", () => {
+        const list = new List([1, 2, 3, 4, 5]);
+        test("should return a list of windows of size 3", () => {
+            const windows = list.windows(3).toList();
+            expect(windows.size()).to.eq(3);
+            expect(windows.get(0).toArray()).to.deep.equal([1, 2, 3]);
+            expect(windows.get(1).toArray()).to.deep.equal([2, 3, 4]);
+            expect(windows.get(2).toArray()).to.deep.equal([3, 4, 5]);
+        });
+        test("should return a list of windows of size 1", () => {
+            const windows = list.windows(1).toList();
+            expect(windows.size()).to.eq(5);
+            expect(windows.get(0).toArray()).to.deep.equal([1]);
+            expect(windows.get(1).toArray()).to.deep.equal([2]);
+            expect(windows.get(2).toArray()).to.deep.equal([3]);
+            expect(windows.get(3).toArray()).to.deep.equal([4]);
+            expect(windows.get(4).toArray()).to.deep.equal([5]);
+        });
+        test("should return a list of windows of size 5", () => {
+            const windows = list.windows(5).toList();
+            expect(windows.size()).to.eq(1);
+            expect(windows.get(0).toArray()).to.deep.equal([1, 2, 3, 4, 5]);
+        });
+        test("should return an empty list if size is greater than source size", () => {
+            const windows = list.windows(6).toList();
+            expect(windows.size()).to.eq(0);
+        });
+        it("should throw an error if size is less than 1", () => {
+            expect(() => list.windows(0)).to.throw("Size must be greater than 0.");
+            expect(() => list.windows(-1)).to.throw("Size must be greater than 0.");
+        });
+    });
+
     describe("#zip()", () => {
         const numberList = new List([1, 2, 3, 4]);
         const stringList = new List(["one", "two", "three"]);

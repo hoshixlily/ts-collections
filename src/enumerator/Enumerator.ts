@@ -638,6 +638,13 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
         return new Enumerator<TElement>(() => this.whereGenerator(predicate));
     }
 
+    public windows(size: number): IEnumerable<IEnumerable<TElement>> {
+        if (size < 1) {
+            throw new InvalidArgumentException("Size must be greater than 0.", "size");
+        }
+        return new Enumerator<IEnumerable<TElement>>(() => this.windowsGenerator(size));
+    }
+
     public zip<TSecond, TResult = [TElement, TSecond]>(iterable: Iterable<TSecond>, zipper?: Zipper<TElement, TSecond, TResult>): IEnumerable<[TElement, TSecond]> | IEnumerable<TResult> {
         return new Enumerator(() => this.zipGenerator(iterable, zipper));
     }
@@ -958,6 +965,18 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
                 yield d;
             }
             ++index;
+        }
+    }
+
+    private* windowsGenerator(size: number): Iterable<IEnumerable<TElement>> {
+        const iterator = this[Symbol.iterator]();
+        const window = new List<TElement>();
+        for (let item = iterator.next(); !item.done; item = iterator.next()) {
+            window.add(item.value);
+            if (window.size() === size) {
+                yield window.toImmutableList();
+                window.removeAt(0);
+            }
         }
     }
 

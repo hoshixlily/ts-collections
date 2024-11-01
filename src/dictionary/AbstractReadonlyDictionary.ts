@@ -41,7 +41,7 @@ import { SortedDictionary } from "./SortedDictionary";
 
 export abstract class AbstractReadonlyDictionary<TKey, TValue> implements IReadonlyDictionary<TKey, TValue> {
     protected readonly keyValueComparer: EqualityComparator<KeyValuePair<TKey, TValue>>;
-    protected valueComparer: EqualityComparator<TValue>;
+    protected readonly valueComparer: EqualityComparator<TValue>;
 
     protected constructor(valueComparator: EqualityComparator<TValue>, keyValueComparator: EqualityComparator<KeyValuePair<TKey, TValue>>) {
         this.valueComparer = valueComparator;
@@ -364,6 +364,10 @@ export abstract class AbstractReadonlyDictionary<TKey, TValue> implements IReado
 
     public where(predicate: IndexedPredicate<KeyValuePair<TKey, TValue>>): IEnumerable<KeyValuePair<TKey, TValue>> {
         return EnumerableStatic.where(this, predicate);
+    }
+
+    public windows(size: number): IEnumerable<IEnumerable<KeyValuePair<TKey, TValue>>> {
+        return EnumerableStatic.windows(this, size);
     }
 
     public zip<TSecond, TResult = [KeyValuePair<TKey, TValue>, TSecond]>(iterable: Iterable<TSecond>, zipper?: Zipper<KeyValuePair<TKey, TValue>, TSecond, TResult>): IEnumerable<[KeyValuePair<TKey, TValue>, TSecond]> | IEnumerable<TResult> {
