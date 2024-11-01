@@ -248,6 +248,10 @@ export abstract class AbstractReadonlyDictionary<TKey, TValue> implements IReado
         return EnumerableStatic.skipWhile(this, predicate);
     }
 
+    public step(step: number): IEnumerable<KeyValuePair<TKey, TValue>> {
+        return EnumerableStatic.step(this, step);
+    }
+
     public sum(selector?: Selector<KeyValuePair<TKey, TValue>, number>): number {
         return EnumerableStatic.sum(this, selector);
     }

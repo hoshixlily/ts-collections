@@ -467,6 +467,21 @@ export interface IEnumerable<TElement> extends Iterable<TElement> {
     skipWhile(predicate: IndexedPredicate<TElement>): IEnumerable<TElement>;
 
     /**
+     * Skips elements in a sequence according to a specified step size.
+     *
+     * Example:
+     * ```typescript
+     *    const numberList = new List([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+     *    const result = numberList.step(2).toArray(); // [1, 3, 5, 7, 9]
+     *    const result2 = numberList.step(3).toArray(); // [1, 4, 7, 10]
+     * ```
+     * @template TElement
+     * @param step The number of elements to skip between each element.
+     * @returns {IEnumerable<TElement>} A new enumerable sequence that contains the elements from the input sequence with the elements skipped according to the specified step size.
+     */
+    step(step: number): IEnumerable<TElement>;
+
+    /**
      * Returns the sum of the values in the sequence.
      * @param selector The selector function that will be used to select the value to sum. If not specified, the value itself will be used.
      * @returns {number} The sum of the values in the sequence.

@@ -1,4 +1,4 @@
-import { describe } from "vitest";
+import { describe, test } from "vitest";
 import { Enumerable, ImmutableList, PriorityQueue, ReadonlyCollection, Stack } from "../../src/imports";
 import { List } from "../../src/list/List";
 import { EqualityComparator } from "../../src/shared/EqualityComparator";
@@ -1398,6 +1398,41 @@ describe("List", () => {
             expect(list.get(4)).to.eq(8);
             expect(list.get(5)).to.eq(10);
         })
+    });
+
+    describe("#step()", () => {
+        test("should return an IEnumerable with elements [1,3,5,7,9]", () => {
+            const list = new List([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            const list2 = list.step(2).toList();
+            expect(list2.toArray()).to.deep.equal([1, 3, 5, 7, 9]);
+            expect(list2.count()).to.eq(5);
+        });
+        test("should return an IEnumerable with elements [1,4,7,10]", () => {
+            const list = new List([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            const list2 = list.step(3).toList();
+            expect(list2.toArray()).to.deep.equal([1, 4, 7, 10]);
+            expect(list2.count()).to.eq(4);
+        });
+        test("should return an IEnumerable with elements [1,5,9]", () => {
+            const list = new List([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            const list2 = list.step(4).toList();
+            expect(list2.toArray()).to.deep.equal([1, 5, 9]);
+            expect(list2.count()).to.eq(3);
+        });
+        test("should return an IEnumerable with only the first element", () => {
+            const list = new List([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            const list2 = list.step(10).toList();
+            const list3 = list.step(100).toList();
+            expect(list2.toArray()).to.deep.equal([1]);
+            expect(list2.count()).to.eq(1);
+            expect(list3.toArray()).to.deep.equal([1]);
+            expect(list3.count()).to.eq(1);
+        });
+        test("should throw error if step is less than 1", () => {
+            const list = new List([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            expect(() => list.step(0)).toThrow("Step must be greater than 0.");
+            expect(() => list.step(-1)).toThrow("Step must be greater than 0.");
+        });
     });
 
     describe("#sum()", () => {

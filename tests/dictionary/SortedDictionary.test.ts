@@ -1,4 +1,4 @@
-import { expect } from "vitest";
+import { describe, expect } from "vitest";
 import { KeyValuePair } from "../../src/dictionary/KeyValuePair";
 import { SortedDictionary } from "../../src/dictionary/SortedDictionary";
 import { Dictionary, Enumerable, List } from "../../src/imports";
@@ -1127,6 +1127,42 @@ describe("SortedDictionary", () => {
         });
     });
 
+    describe("#step()", () => {
+        test("should return a dictionary with people 'Alice' and 'Priscilla'", () => {
+            const dict = new SortedDictionary<string, Person>();
+            dict.add(Person.Alice.name, Person.Alice);
+            dict.add(Person.Viola.name, Person.Viola);
+            dict.add(Person.Priscilla.name, Person.Priscilla);
+            dict.add(Person.Lucrezia.name, Person.Lucrezia);
+            const people = dict.step(2).select(p => [p.key, p.value.surname]).toArray();
+            const expectedResult = [
+                ["Alice", "Rivermist"],
+                ["Priscilla", "Necci"]
+            ];
+            expect(people).to.deep.equal(expectedResult);
+        });
+        test("should return only the first element if dictionary contains fewer than taken elements", () => {
+            const dict = new SortedDictionary<string, Person>();
+            dict.add(Person.Rui.name, Person.Rui);
+            dict.add(Person.Setsuna.name, Person.Setsuna);
+            dict.add(Person.Reina.name, Person.Reina);
+            dict.add(Person.Mirei.name, Person.Mirei);
+            const people = dict.step(100).toSortedDictionary(p => p.key, p => p.value);
+            expect(people.size()).to.eq(1);
+        });
+        test("it should return an empty dictionary if the dictionary is empty", () => {
+            const dict = new SortedDictionary<string, Person>();
+            const people = dict.step(2).toSortedDictionary(p => p.key, p => p.value);
+            expect(people.size()).to.eq(0);
+        });
+        test("it should throw an error if the step is less than 1", () => {
+            const dict = new SortedDictionary<string, Person>();
+            dict.add(Person.Setsuna.name, Person.Setsuna);
+            dict.add(Person.Rui.name, Person.Rui);
+            expect(() => dict.step(0)).toThrow("Step must be greater than 0.");
+        });
+    });
+
     describe("#sum()", () => {
         const dict = new SortedDictionary<number, Person>();
         dict.add(5000, Person.Alice);
@@ -1556,6 +1592,42 @@ describe("SortedDictionary", () => {
             expect(dict.get(Person.Noemi.name)).to.null;
             expect(dict.get(Person.Priscilla.name)).to.not.null;
             expect(dict.length).to.eq(1);
+        });
+    });
+
+    describe("#windows()", () => {
+        const dict = new SortedDictionary<number, string>();
+        Enumerable.range(1, 5).shuffle().forEach(i => dict.add(i, `item${i}`));
+        test("should return a list of enumerables with 3 elements each", () => {
+            const windows = dict.windows(3)
+                .select(w => w.select(p => p.key).toArray())
+                .toArray();
+            const expectedWindows = [[1, 2, 3], [2, 3, 4], [3, 4, 5]];
+            expect(windows).to.deep.equal(expectedWindows);
+        });
+        test("should return a list of enumerables with 1 element each", () => {
+            const windows = dict.windows(1)
+                .select(w => w.select(p => p.key).toArray())
+                .toArray();
+            const expectedWindows = [[1], [2], [3], [4], [5]];
+            expect(windows).to.deep.equal(expectedWindows);
+        });
+        test("should return a list of enumerables with 5 elements each", () => {
+            const windows = dict.windows(5)
+                .select(w => w.select(p => p.key).toArray())
+                .toArray();
+            const expectedWindows = [[1, 2, 3, 4, 5]];
+            expect(windows).to.deep.equal(expectedWindows);
+        });
+        test("should return an empty list if window size is greater than dictionary size", () => {
+            const windows = dict.windows(100)
+                .select(w => w.select(p => p.key).toArray())
+                .toArray();
+            expect(windows).to.deep.equal([]);
+        });
+        test("should throw an error if window size is less than 1", () => {
+            expect(() => dict.windows(0)).toThrow("Size must be greater than 0.");
+            expect(() => dict.windows(-14)).toThrow("Size must be greater than 0.");
         });
     });
 

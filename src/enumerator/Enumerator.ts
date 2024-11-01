@@ -487,6 +487,13 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
         return new Enumerator(() => this.skipWhileGenerator(predicate));
     }
 
+    public step(step: number): IEnumerable<TElement> {
+        if (step < 1) {
+            throw new InvalidArgumentException("Step must be greater than 0.", "step");
+        }
+        return new Enumerator(() => this.stepGenerator(step));
+    }
+
     public sum(selector?: Selector<TElement, number>): number {
         if (!this.any()) {
             throw new NoElementsException();
@@ -876,6 +883,16 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
                 skipEnded = true;
                 yield item;
             }
+        }
+    }
+
+    private* stepGenerator(step: number): Iterable<TElement> {
+        let index = 0;
+        for (const item of this) {
+            if (index % step === 0) {
+                yield item;
+            }
+            ++index;
         }
     }
 

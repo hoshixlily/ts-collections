@@ -217,6 +217,10 @@ export abstract class EnumerableStatic {
         return new Enumerable(source).skipWhile(predicate);
     }
 
+    public static step<TElement>(source: IEnumerable<TElement>, step: number): IEnumerable<TElement> {
+        return new Enumerable(source).step(step);
+    }
+
     public static sum<TElement>(source: IEnumerable<TElement>, selector?: Selector<TElement, number>): number {
         return new Enumerable(source).sum(selector);
     }

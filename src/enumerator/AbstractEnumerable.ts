@@ -227,6 +227,10 @@ export abstract class AbstractEnumerable<TElement> implements IEnumerable<TEleme
         return EnumerableStatic.skipWhile(this, predicate);
     }
 
+    public step(step: number): IEnumerable<TElement> {
+        return EnumerableStatic.step(this, step);
+    }
+
     public sum(selector?: Selector<TElement, number>): number {
         return EnumerableStatic.sum(this, selector);
     }

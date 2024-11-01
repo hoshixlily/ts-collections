@@ -270,6 +270,10 @@ export class Lookup<TKey, TElement> implements ILookup<TKey, TElement> {
         return this.#lookupTree.skipWhile(predicate);
     }
 
+    public step(step: number): IEnumerable<IGroup<TKey, TElement>> {
+        return this.#lookupTree.step(step);
+    }
+
     public sum(selector?: Selector<IGroup<TKey, TElement>, number>): number {
         return this.#lookupTree.sum(selector);
     }

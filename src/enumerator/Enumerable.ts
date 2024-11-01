@@ -272,6 +272,10 @@ export class Enumerable<TElement> implements IEnumerable<TElement> {
         return this.#enumerator.skipWhile(predicate);
     }
 
+    public step(step: number): IEnumerable<TElement> {
+        return this.#enumerator.step(step);
+    }
+
     public sum(selector?: Selector<TElement, number>): number {
         return this.#enumerator.sum(selector);
     }
