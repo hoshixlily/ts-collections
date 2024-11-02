@@ -129,6 +129,10 @@ export abstract class EnumerableStatic {
         return new Enumerable(source).intersect(other, comparator);
     }
 
+    public static intersperse<TElement, TSeparator = TElement>(source: IEnumerable<TElement>, separator: TSeparator): IEnumerable<TElement | TSeparator> {
+        return new Enumerable(source).intersperse(separator);
+    }
+
     public static join<TOuter, TInner, TKey, TResult>(source: IEnumerable<TOuter>, innerEnumerable: IEnumerable<TInner>, outerKeySelector: Selector<TOuter, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TOuter, TInner, TResult>, keyComparator?: EqualityComparator<TKey>, leftJoin?: boolean): IEnumerable<TResult> {
         return new Enumerable(source).join(innerEnumerable, outerKeySelector, innerKeySelector, resultSelector, keyComparator, leftJoin);
     }

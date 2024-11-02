@@ -176,6 +176,10 @@ export class Lookup<TKey, TElement> implements ILookup<TKey, TElement> {
         return this.#lookupTree.intersect(iterable, comparator);
     }
 
+    public intersperse<TSeparator = IGroup<TKey, TElement>>(separator: TSeparator): IEnumerable<IGroup<TKey, TElement> | TSeparator> {
+        return this.#lookupTree.intersperse(separator);
+    }
+
     public join<TInner, TGroupKey, TResult>(innerEnumerable: IEnumerable<TInner>, outerKeySelector: Selector<IGroup<TKey, TElement>, TGroupKey>,
                                             innerKeySelector: Selector<TInner, TGroupKey>, resultSelector: JoinSelector<IGroup<TKey, TElement>, TInner, TResult>,
                                             keyComparator?: EqualityComparator<TGroupKey>, leftJoin?: boolean): IEnumerable<TResult> {

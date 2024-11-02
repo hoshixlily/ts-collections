@@ -679,6 +679,21 @@ describe("List", () => {
         });
     });
 
+    describe("#intersperse()", () => {
+        test("should return [1, 'a', 2, 'a', 3, 'a', 4, 'a', 5]", () => {
+            const list = new List([1, 2, 3, 4, 5]);
+            const interspersed = list.intersperse("a").toList();
+            expect(interspersed.toArray()).to.deep.equal([1, "a", 2, "a", 3, "a", 4, "a", 5]);
+            expect(interspersed.length).to.eq(9);
+        });
+        test("should return empty list if list is empty", () => {
+            const list = new List<number>();
+            const interspersed = list.intersperse(0).toList();
+            expect(interspersed.toArray()).to.deep.equal([]);
+            expect(interspersed.length).to.eq(0);
+        });
+    });
+
     describe("#isEmpty()", () => {
         const list1 = new List([Person.Alice, Person.Noemi, null, Person.Noemi2, null]);
         test("should return false if list is not empty", () => {

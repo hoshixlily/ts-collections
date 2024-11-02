@@ -246,6 +246,14 @@ export interface IEnumerable<TElement> extends Iterable<TElement> {
     intersect(iterable: Iterable<TElement>, comparator?: EqualityComparator<TElement> | OrderComparator<TElement> | null): IEnumerable<TElement>;
 
     /**
+     * Intersperses a specified element between each element of the sequence.
+     * @template TElement, TSeparator
+     * @param separator The element that will be interspersed between each element of the sequence.
+     * @returns {IEnumerable<TElement|TSeparator>} A new enumerable sequence whose elements are the elements of the source sequence interspersed with the specified element.
+     */
+    intersperse<TSeparator = TElement>(separator: TSeparator): IEnumerable<TElement | TSeparator>;
+
+    /**
      * Correlates the elements of two sequences based on equality of keys
      * @template TInner, TKey, TResult, TElement
      * @param innerEnumerable The enumerable sequence to join to the first sequence.

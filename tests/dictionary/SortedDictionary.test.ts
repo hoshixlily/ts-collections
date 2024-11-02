@@ -566,6 +566,34 @@ describe("SortedDictionary", () => {
         });
     });
 
+    describe("#intersperse()", () => {
+        const dict = new SortedDictionary<string, string>();
+        dict.add("a", "a");
+        dict.add("b", "b");
+        dict.add("c", "c");
+        test("should return a new dictionary with the separator between each element", () => {
+            const result = dict.intersperse("::");
+            const e0 = result.elementAt(0);
+            const e1 = result.elementAt(1);
+            const e2 = result.elementAt(2);
+            const e3 = result.elementAt(3);
+            const e4 = result.elementAt(4);
+            expect(e0).to.be.instanceof(KeyValuePair);
+            expect(e2).to.be.instanceof(KeyValuePair);
+            expect(e4).to.be.instanceof(KeyValuePair);
+            expect(e1).toBeTypeOf("string");
+            expect(e3).toBeTypeOf("string");
+            expect(e1).to.eq("::");
+            expect(e3).to.eq("::");
+            expect((e0 as KeyValuePair<string, string>).key).to.eq("a");
+            expect((e0 as KeyValuePair<string, string>).value).to.eq("a");
+            expect((e2 as KeyValuePair<string, string>).key).to.eq("b");
+            expect((e2 as KeyValuePair<string, string>).value).to.eq("b");
+            expect((e4 as KeyValuePair<string, string>).key).to.eq("c");
+            expect((e4 as KeyValuePair<string, string>).value).to.eq("c");
+        });
+    });
+
     describe("#isEmpty()", () => {
         test("should return true if dictionary is empty", () => {
             const dictionary = new SortedDictionary<number, string>();

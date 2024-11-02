@@ -155,6 +155,10 @@ export abstract class AbstractReadonlyDictionary<TKey, TValue> implements IReado
         return EnumerableStatic.intersect(this, iterable, comparator);
     }
 
+    public intersperse<TSeparator = KeyValuePair<TKey, TValue>>(separator: TSeparator): IEnumerable<KeyValuePair<TKey, TValue> | TSeparator> {
+        return EnumerableStatic.intersperse(this, separator);
+    }
+
     public isEmpty(): boolean {
         return this.size() === 0;
     }

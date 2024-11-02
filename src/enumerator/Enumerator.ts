@@ -250,6 +250,10 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
         return new Enumerator(() => this.intersectGenerator(iterable, comparator));
     }
 
+    public intersperse<TSeparator = TElement>(separator: TSeparator): IEnumerable<TElement | TSeparator> {
+        return new Enumerator(() => this.intersperseGenerator(separator));
+    }
+
     public join<TInner, TKey, TResult>(innerEnumerable: IEnumerable<TInner>, outerKeySelector: Selector<TElement, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TElement, TInner, TResult>, keyComparator?: EqualityComparator<TKey>, leftJoin?: boolean): IEnumerable<TResult> {
         keyComparator ??= Comparators.equalityComparator;
         return new Enumerator(() => this.joinGenerator(innerEnumerable, outerKeySelector, innerKeySelector, resultSelector, keyComparator, leftJoin));
@@ -772,6 +776,17 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
                     yield item;
                 }
             }
+        }
+    }
+
+    private* intersperseGenerator<TSeparator = TElement>(separator: TSeparator): Iterable<TElement | TSeparator> {
+        let index = 0;
+        for (const item of this) {
+            if (index !== 0) {
+                yield separator;
+            }
+            yield item;
+            ++index;
         }
     }
 
