@@ -391,6 +391,20 @@ export const intersect = <TElement>(
 }
 
 /**
+ * Intersperses a specified element between each element of the sequence.
+ * @template TElement, TSeparator
+ * @param source The source sequence.
+ * @param separator The element that will be interspersed between each element of the sequence.
+ * @returns {IEnumerable<TElement|TSeparator>} A new enumerable sequence whose elements are the elements of the source sequence interspersed with the specified element.
+ */
+export const intersperse = <TElement, TSeparator>(
+    source: Iterable<TElement>,
+    separator: TSeparator
+): IEnumerable<TElement | TSeparator> => {
+    return from(source).intersperse(separator);
+}
+
+/**
  * Correlates the elements of two sequences based on equality of keys
  * @template TElement The type of elements in the source sequence.
  * @template TInner The type of elements in the inner sequence.
@@ -475,6 +489,20 @@ export const min = <TElement>(
     selector?: Selector<TElement, number>
 ): number => {
     return from(source).min(selector);
+}
+
+/**
+ * Determines whether no elements of the sequence satisfy the specified predicate.
+ * If no predicate is specified, it will return true if the sequence is empty.
+ * @param source The source sequence.
+ * @param predicate The predicate function that will be used to check each element for a condition.
+ * @returns {boolean} true if no elements of the sequence satisfy the specified predicate; otherwise, false.
+ */
+export const none = <TElement>(
+    source: Iterable<TElement>,
+    predicate?: Predicate<TElement>
+): boolean => {
+    return from(source).none(predicate);
 }
 
 /**
@@ -594,6 +622,19 @@ export const prepend = <TElement>(
     element: TElement
 ): IEnumerable<TElement> => {
     return from(source).prepend(element);
+}
+
+/**
+ * Computes the product of the sequence.
+ * @param source The source sequence.
+ * @param selector The selector function that will be used to select a numeric value from the sequence elements.
+ * @returns {number} The product of the sequence.
+ */
+export const product = <TElement>(
+    source: Iterable<TElement>,
+    selector?: Selector<TElement, number>
+): number => {
+    return from(source).product(selector);
 }
 
 /**
@@ -774,6 +815,27 @@ export const skipWhile = <TElement>(
     predicate: Predicate<TElement>
 ): IEnumerable<TElement> => {
     return from(source).skipWhile(predicate);
+}
+
+/**
+ * Skips elements in a sequence according to a specified step size.
+ *
+ * Example:
+ * ```typescript
+ *    const numberList = new List([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+ *    const result = numberList.step(2).toArray(); // [1, 3, 5, 7, 9]
+ *    const result2 = numberList.step(3).toArray(); // [1, 4, 7, 10]
+ * ```
+ * @template TElement
+ * @param source The source sequence.
+ * @param step The number of elements to skip between each element.
+ * @returns {IEnumerable<TElement>} A new enumerable sequence that contains the elements from the input sequence with the elements skipped according to the specified step size.
+ */
+export const step = <TElement>(
+    source: Iterable<TElement>,
+    step: number
+): IEnumerable<TElement> => {
+    return from(source).step(step);
 }
 
 /**
@@ -1186,6 +1248,36 @@ export const where = <TElement>(
     predicate: Predicate<TElement>
 ): IEnumerable<TElement> => {
     return from(source).where(predicate);
+}
+
+/**
+ * Returns an enumerable sequence of windows of the specified size.
+ * If the size is less than or equal to 0, an error will be thrown.
+ * If the size is greater than the number of elements in the sequence, an empty sequence will be returned.
+ *
+ * The windows will overlap, meaning that each element will be included in multiple windows.
+ *
+ * Example:
+ * ```typescript
+ *   const numberList = new List([1, 2, 3, 4, 5]);
+ *   const result = numberList.windows(3).toArray(); // [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
+ *   const result2 = numberList.windows(1).toArray(); // [[1], [2], [3], [4], [5]]
+ *   const result3 = numberList.windows(5).toArray(); // [[1, 2, 3, 4, 5]]
+ *   const result4 = numberList.windows(6).toArray(); // []
+ *   const result5 = numberList.windows(0).toArray(); // Error
+ *   const result6 = numberList.windows(-1).toArray(); // Error
+ * ```
+ * @template TElement
+ * @param source The source sequence.
+ * @param size The size of the windows.
+ * @returns {IEnumerable<IEnumerable<TElement>>} A new enumerable sequence that contains the specified number of elements from the start of the input sequence.
+ * @throws {InvalidArgumentException} If size is less than or equal to 0.
+ */
+export const windows = <TElement>(
+    source: Iterable<TElement>,
+    size: number
+): IEnumerable<IEnumerable<TElement>> => {
+    return from(source).windows(size);
 }
 
 /**
