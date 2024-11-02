@@ -236,6 +236,10 @@ export class Enumerable<TElement> implements IEnumerable<TElement> {
         return this.#enumerator.prepend(element);
     }
 
+    public product(selector?: Selector<TElement, number>): number {
+        return this.#enumerator.product(selector);
+    }
+
     public reverse(): IEnumerable<TElement> {
         return this.#enumerator.reverse();
     }

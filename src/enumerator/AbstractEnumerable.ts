@@ -190,6 +190,10 @@ export abstract class AbstractEnumerable<TElement> implements IEnumerable<TEleme
         return EnumerableStatic.prepend(this, element);
     }
 
+    public product(selector?: Selector<TElement, number>): number {
+        return EnumerableStatic.product(this, selector);
+    }
+
     public reverse(): IEnumerable<TElement> {
         return EnumerableStatic.reverse(this);
     }

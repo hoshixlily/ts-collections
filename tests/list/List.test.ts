@@ -1038,6 +1038,31 @@ describe("List", () => {
         });
     });
 
+    describe("#product()", () => {
+        test("should return the product of all elements", () => {
+            const list = new List([1, 2, 3, 4, 5]);
+            const product = list.product();
+            expect(product).to.eq(120);
+        });
+        test("should return the product of all elements", () => {
+            const list1 = new List([1, 2, 3, 4, 5, 0]);
+            const list2 = new List([-1, -2, -3, -4, -5]);
+            const product1 = list1.product();
+            const product2 = list2.product();
+            expect(product1).to.eq(0);
+            expect(product2).to.eq(-120);
+        });
+        test("it should use the provided selector", () => {
+            const list = new List([Person.Alice, Person.Reina, Person.Mirei]);
+            const product = list.product(p => p.age);
+            expect(product).to.eq(Person.Alice.age * Person.Reina.age * Person.Mirei.age);
+        });
+        test("should throw error if list is empty", () => {
+            const list = new List<number>();
+            expect(() => list.product()).toThrow(new NoElementsException());
+        });
+    });
+
     describe("#remove()", () => {
         const list1 = new List([Person.Alice, Person.Noemi, null, Person.Noemi2, null]);
         test("should remove null from index 2", () => {

@@ -384,6 +384,17 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
         return new Enumerator(() => this.prependGenerator(element));
     }
 
+    public product(selector?: Selector<TElement, number>): number {
+        if (!this.any()) {
+            throw new NoElementsException();
+        }
+        let total: number = 1;
+        for (const d of this) {
+            total *= selector?.(d) ?? d as unknown as number;
+        }
+        return total;
+    }
+
     public reverse(): IEnumerable<TElement> {
         return new Enumerator(() => this.reverseGenerator());
     }

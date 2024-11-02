@@ -891,6 +891,18 @@ describe("Dictionary", () => {
         });
     });
 
+    describe("#product()", () => {
+        const dict = new Dictionary<number, Person>([
+            [Person.Rui.age, Person.Rui],
+            [Person.Setsuna.age, Person.Setsuna],
+            [Person.Ayana.age, Person.Ayana]
+        ]);
+        test("should return the product of all keys", () => {
+            const product = dict.product(p => p.key);
+            expect(product).to.eq(Person.Rui.age * Person.Setsuna.age * Person.Ayana.age);
+        });
+    });
+
     describe("#put()", () => {
         const dict = new Dictionary<number, number>();
         dict.add(9, 80);

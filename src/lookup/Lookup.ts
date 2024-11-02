@@ -230,6 +230,10 @@ export class Lookup<TKey, TElement> implements ILookup<TKey, TElement> {
         return this.#lookupTree.prepend(element);
     }
 
+    public product(selector?: Selector<IGroup<TKey, TElement>, number>): number {
+        return this.#lookupTree.product(selector);
+    }
+
     public reverse(): IEnumerable<IGroup<TKey, TElement>> {
         return this.#lookupTree.reverse();
     }

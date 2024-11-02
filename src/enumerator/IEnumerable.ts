@@ -388,6 +388,13 @@ export interface IEnumerable<TElement> extends Iterable<TElement> {
     prepend(element: TElement): IEnumerable<TElement>;
 
     /**
+     * Computes the product of the sequence.
+     * @param selector The selector function that will be used to select a numeric value from the sequence elements.
+     * @returns {number} The product of the sequence.
+     */
+    product(selector?: Selector<TElement, number>): number;
+
+    /**
      * Inverts the order of the elements in the sequence.
      * @template TElement
      * @returns {IEnumerable<TElement>} A new enumerable sequence whose elements are in the reverse order of the source sequence.

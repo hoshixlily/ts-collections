@@ -211,6 +211,10 @@ export abstract class AbstractReadonlyDictionary<TKey, TValue> implements IReado
         return EnumerableStatic.prepend(this, element);
     }
 
+    public product(selector?: Selector<KeyValuePair<TKey, TValue>, number>): number {
+        return EnumerableStatic.product(this, selector);
+    }
+
     public reverse(): IEnumerable<KeyValuePair<TKey, TValue>> {
         return EnumerableStatic.reverse(this);
     }

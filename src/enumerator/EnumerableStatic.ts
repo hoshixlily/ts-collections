@@ -181,6 +181,10 @@ export abstract class EnumerableStatic {
         return new Enumerable(source).prepend(item);
     }
 
+    public static product<TElement>(source: IEnumerable<TElement>, selector?: Selector<TElement, number>): number {
+        return new Enumerable(source).product(selector);
+    }
+
     public static reverse<TElement>(source: IEnumerable<TElement>): IEnumerable<TElement> {
         return new Enumerable(source).reverse();
     }
