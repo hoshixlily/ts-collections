@@ -108,6 +108,7 @@ export {
     skip,
     skipLast,
     skipWhile,
+    span,
     step,
     sum,
     take,

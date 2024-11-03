@@ -514,6 +514,25 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
         return new Enumerator(() => this.skipWhileGenerator(predicate));
     }
 
+    public span(predicate: Predicate<TElement>): [IEnumerable<TElement>, IEnumerable<TElement>] {
+        const span = new List<TElement>();
+        const rest = new List<TElement>();
+        let found = false;
+        for (const item of this) {
+            if (found) {
+                rest.add(item);
+            } else {
+                if (predicate(item)) {
+                    span.add(item);
+                } else {
+                    found = true;
+                    rest.add(item);
+                }
+            }
+        }
+        return [new Enumerable(span), new Enumerable(rest)];
+    }
+
     public step(step: number): IEnumerable<TElement> {
         if (step < 1) {
             throw new InvalidArgumentException("Step must be greater than 0.", "step");

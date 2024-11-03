@@ -818,6 +818,24 @@ export const skipWhile = <TElement>(
 }
 
 /**
+ * Splits the sequence into two sequences based on a predicate.
+ * The first sequence contains the elements from the start of the input sequence that satisfy the predicate,
+ * and it continues until the predicate no longer holds.
+ * The second sequence contains the remaining elements.
+ * @template TElement
+ * @param source The source sequence.
+ * @param predicate The predicate function that will be used to test each element.
+ * @returns {[IEnumerable<TElement>, IEnumerable<TElement>]} A tuple of two enumerable sequences, the first one containing the elements that satisfy the condition,
+ * and the second one containing the rest of the elements regardless of the condition.
+ */
+export const span = <TElement>(
+    source: Iterable<TElement>,
+    predicate: Predicate<TElement>
+): [IEnumerable<TElement>, IEnumerable<TElement>] => {
+    return from(source).span(predicate);
+}
+
+/**
  * Skips elements in a sequence according to a specified step size.
  *
  * Example:

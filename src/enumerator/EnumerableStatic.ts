@@ -229,6 +229,10 @@ export abstract class EnumerableStatic {
         return new Enumerable(source).skipWhile(predicate);
     }
 
+    public static span<TElement>(source: IEnumerable<TElement>, predicate: Predicate<TElement>): [IEnumerable<TElement>, IEnumerable<TElement>] {
+        return new Enumerable(source).span(predicate);
+    }
+
     public static step<TElement>(source: IEnumerable<TElement>, step: number): IEnumerable<TElement> {
         return new Enumerable(source).step(step);
     }

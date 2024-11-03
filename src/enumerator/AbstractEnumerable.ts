@@ -239,6 +239,10 @@ export abstract class AbstractEnumerable<TElement> implements IEnumerable<TEleme
         return EnumerableStatic.skipWhile(this, predicate);
     }
 
+    public span(predicate: Predicate<TElement>): [IEnumerable<TElement>, IEnumerable<TElement>] {
+        return EnumerableStatic.span(this, predicate);
+    }
+
     public step(step: number): IEnumerable<TElement> {
         return EnumerableStatic.step(this, step);
     }

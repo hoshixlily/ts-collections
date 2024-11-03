@@ -1463,6 +1463,35 @@ describe("List", () => {
         })
     });
 
+    describe("#span()", () => {
+        test("should return two lists", () => {
+            const list = new List([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 6, 5, 3]);
+            const [first, second] = list.span(n => n < 6);
+            expect(first.toArray()).to.deep.equal([1, 2, 3, 4, 5]);
+            expect(second.toArray()).to.deep.equal([6, 7, 8, 9, 10, 6, 5, 3]);
+        });
+        test("should have empty list for first part and full list for second part", () => {
+            const list = new List([1, 2, 3, 4, 5]);
+            const [first, second] = list.span(n => n > 100);
+            expect(second.toArray()).to.deep.equal([1,2,3,4,5]);
+            expect(first.none()).to.eq(true);
+            expect(second.none()).to.eq(false);
+        });
+        test("should have full list for first part and empty list for second part", () => {
+            const list = new List([1, 2, 3, 4, 5]);
+            const [first, second] = list.span(n => n < 100);
+            expect(first.toArray()).to.deep.equal([1,2,3,4,5]);
+            expect(first.none()).to.eq(false);
+            expect(second.none()).to.eq(true);
+        });
+        test("should have empty list for both parts", () => {
+            const list = new List<number>();
+            const [first, second] = list.span(n => n < 100);
+            expect(first.none()).to.eq(true);
+            expect(second.none()).to.eq(true);
+        });
+    });
+
     describe("#step()", () => {
         test("should return an IEnumerable with elements [1,3,5,7,9]", () => {
             const list = new List([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);

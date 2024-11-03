@@ -284,6 +284,10 @@ export class Enumerable<TElement> implements IEnumerable<TElement> {
         return this.#enumerator.skipWhile(predicate);
     }
 
+    public span(predicate: Predicate<TElement>): [IEnumerable<TElement>, IEnumerable<TElement>] {
+        return this.#enumerator.span(predicate);
+    }
+
     public step(step: number): IEnumerable<TElement> {
         return this.#enumerator.step(step);
     }

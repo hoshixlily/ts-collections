@@ -1274,6 +1274,21 @@ describe("Dictionary", () => {
         });
     });
 
+    describe("#span()", () => {
+        test("should return a dictionary with people 'Priscilla' and 'Vanessa'", () => {
+            const dict = new Dictionary<string, Person>();
+            dict.add(Person.Alice.name, Person.Alice);
+            dict.add(Person.Rui.name, Person.Rui);
+            dict.add(Person.Setsuna.name, Person.Setsuna);
+            dict.add(Person.Ayana.name, Person.Ayana);
+            const [group1, group2] = dict.span(p => p.key.localeCompare("Setsuna") !== 0);
+            const group1Keys = group1.select(p => p.key).toArray();
+            const group2Keys = group2.select(p => p.key).toArray();
+            expect(group1Keys).to.deep.equal(["Alice", "Rui"]);
+            expect(group2Keys).to.deep.equal(["Setsuna", "Ayana"]);
+        });
+    });
+
     describe("#sum()", () => {
         const dict = new Dictionary<number, Person>();
         dict.add(5000, Person.Alice);

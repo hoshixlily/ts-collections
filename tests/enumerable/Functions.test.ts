@@ -64,6 +64,7 @@ import {
     skipWhile,
     SortedDictionary,
     SortedSet,
+    span,
     Stack,
     step,
     sum,
@@ -1105,6 +1106,15 @@ describe("Enumerable Standalone Functions", () => {
             const list2 = skipWhile(list, n => n < 10).toList();
             expect(list2.size()).to.eq(0);
             expect(list2.length).to.eq(0);
+        });
+    });
+
+    describe("#span", () => {
+        test("should return two lists", () => {
+            const list = new List([1, 2, 3, 4, 5]);
+            const result = span(list, n => n < 3);
+            expect(result[0].toArray()).to.deep.equal([1, 2]);
+            expect(result[1].toArray()).to.deep.equal([3, 4, 5]);
         });
     });
 

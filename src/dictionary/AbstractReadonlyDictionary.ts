@@ -260,6 +260,10 @@ export abstract class AbstractReadonlyDictionary<TKey, TValue> implements IReado
         return EnumerableStatic.skipWhile(this, predicate);
     }
 
+    public span(predicate: Predicate<KeyValuePair<TKey, TValue>>): [IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>] {
+        return EnumerableStatic.span(this, predicate);
+    }
+
     public step(step: number): IEnumerable<KeyValuePair<TKey, TValue>> {
         return EnumerableStatic.step(this, step);
     }
