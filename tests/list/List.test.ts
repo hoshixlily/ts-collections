@@ -232,6 +232,48 @@ describe("List", () => {
         });
     });
 
+    describe("#combinations()", () => {
+        const list = new List([1, 2, 3]);
+        test("should return all combinations", () => {
+            const combinations = list.combinations();
+            const array = combinations.select(c => c.toArray()).toArray();
+            expect(array).to.deep.equal([[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]);
+        });
+        test("should return all combinations of length 2", () => {
+            const combinations = list.combinations(2);
+            const array = combinations.select(c => c.toArray()).toArray();
+            expect(array).to.deep.equal([[1, 2], [1, 3], [2, 3]]);
+        });
+        test("should return all combinations of length 3", () => {
+            const combinations = list.combinations(3);
+            const array = combinations.select(c => c.toArray()).toArray();
+            expect(array).to.deep.equal([[1, 2, 3]]);
+        });
+        test("should return all combinations of length 4", () => {
+            const combinations = list.combinations(4);
+            const array = combinations.select(c => c.toArray()).toArray();
+            expect(array).to.deep.equal([]);
+        });
+        test("should return all combinations of length 0", () => {
+            const combinations = list.combinations(0);
+            const array = combinations.select(c => c.toArray()).toArray();
+            expect(array).to.deep.equal([[]]);
+        });
+        test("it should return all combinations of length 1", () => {
+            const combinations = list.combinations(1);
+            const array = combinations.select(c => c.toArray()).toArray();
+            expect(array).to.deep.equal([[1], [2], [3]]);
+        });
+        test("should return an empty list if source list is empty", () => {
+            const list = new List<number>();
+            const combinations = list.combinations();
+            expect(combinations.toArray()).to.deep.equal([]);
+        });
+        it("should throw error if length is less than 0", () => {
+            expect(() => list.combinations(-1)).toThrowError("Size must be greater than or equal to 0.");
+        });
+    });
+
     describe("#concat()", () => {
         test("should return a list with [1,2,3,4,5,5,6,7,8,9]", () => {
             const list1 = new List([1, 2, 3, 4, 5]);
@@ -1045,6 +1087,50 @@ describe("List", () => {
             const [evens, odds] = list.partition(n => n % 2 === 0);
             expect(evens.toArray()).to.deep.equal([2, 4, 6, 8, 10]);
             expect(odds.toArray()).to.deep.equal([1, 3, 5, 7, 9]);
+        });
+    });
+
+    describe("#permutations()", () => {
+        test("should return all permutations of the list", () => {
+            const list = new List([1, 2, 3]);
+            const perms = list.permutations().select(p => p.toArray()).toArray();
+            const expected = [
+                [1, 2, 3],
+                [1, 3, 2],
+                [2, 1, 3],
+                [2, 3, 1],
+                [3, 1, 2],
+                [3, 2, 1]
+            ];
+            expect(perms).to.deep.equal(expected);
+        });
+        test("should return all permutations that have the length of 2", () => {
+            const list = new List(["a", "b", "c", "d"]);
+            const perms = list.permutations(2).select(p => p.toArray()).toArray();
+            const expected = [
+                ["a", "b"],
+                ["a", "c"],
+                ["a", "d"],
+                ["b", "a"],
+                ["b", "c"],
+                ["b", "d"],
+                ["c", "a"],
+                ["c", "b"],
+                ["c", "d"],
+                ["d", "a"],
+                ["d", "b"],
+                ["d", "c"]
+            ];
+            expect(perms).to.deep.equal(expected);
+        })
+        test("should throw error if size is less than 1", () => {
+            const list = new List([1, 2, 3]);
+            expect(() => list.permutations(-1)).toThrow("Size must be greater than 0.");
+        });
+        test("should return empty list if source list is empty", () => {
+            const list = new List<number>();
+            const perms = list.permutations().select(p => p.toArray()).toArray();
+            expect(perms).to.deep.equal([[]]);
         });
     });
 

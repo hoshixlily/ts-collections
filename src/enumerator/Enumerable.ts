@@ -128,6 +128,10 @@ export class Enumerable<TElement> implements IEnumerable<TElement> {
         return this.#enumerator.chunk(size);
     }
 
+    public combinations(size?: number): IEnumerable<IEnumerable<TElement>> {
+        return this.#enumerator.combinations(size);
+    }
+
     public concat(iterable: Iterable<TElement>): IEnumerable<TElement> {
         return this.#enumerator.concat(iterable);
     }
@@ -234,6 +238,10 @@ export class Enumerable<TElement> implements IEnumerable<TElement> {
 
     public partition(predicate: Predicate<TElement>): [IEnumerable<TElement>, IEnumerable<TElement>] {
         return this.#enumerator.partition(predicate);
+    }
+
+    public permutations(size?: number): IEnumerable<IEnumerable<TElement>> {
+        return this.#enumerator.permutations(size);
     }
 
     public prepend(element: TElement): IEnumerable<TElement> {

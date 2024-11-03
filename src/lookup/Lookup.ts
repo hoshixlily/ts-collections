@@ -109,6 +109,10 @@ export class Lookup<TKey, TElement> implements ILookup<TKey, TElement> {
         return this.#lookupTree.chunk(size);
     }
 
+    public combinations(size?: number): IEnumerable<IEnumerable<IGroup<TKey, TElement>>> {
+        return this.#lookupTree.combinations(size);
+    }
+
     public concat(iterable: Iterable<IGroup<TKey, TElement>>): IEnumerable<IGroup<TKey, TElement>> {
         return this.#lookupTree.concat(iterable);
     }
@@ -228,6 +232,10 @@ export class Lookup<TKey, TElement> implements ILookup<TKey, TElement> {
 
     public partition(predicate: Predicate<IGroup<TKey, TElement>>): [IEnumerable<IGroup<TKey, TElement>>, IEnumerable<IGroup<TKey, TElement>>] {
         return this.#lookupTree.partition(predicate);
+    }
+
+    public permutations(size?: number): IEnumerable<IEnumerable<IGroup<TKey, TElement>>> {
+        return this.#lookupTree.permutations(size);
     }
 
     public prepend(element: IGroup<TKey, TElement>): IEnumerable<IGroup<TKey, TElement>> {

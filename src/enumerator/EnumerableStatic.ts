@@ -73,6 +73,10 @@ export abstract class EnumerableStatic {
         return new Enumerable(source).chunk(size);
     }
 
+    public static combinations<TElement>(source: IEnumerable<TElement>, size?: number): IEnumerable<IEnumerable<TElement>> {
+        return new Enumerable(source).combinations(size);
+    }
+
     public static concat<TElement>(source: Iterable<TElement>, other: Iterable<TElement>): IEnumerable<TElement> {
         return new Enumerable(source).concat(other);
     }
@@ -179,6 +183,10 @@ export abstract class EnumerableStatic {
 
     public static partition<TElement>(source: IEnumerable<TElement>, predicate: Predicate<TElement>): [IEnumerable<TElement>, IEnumerable<TElement>] {
         return new Enumerable(source).partition(predicate);
+    }
+
+    public static permutations<TElement>(source: IEnumerable<TElement>, size?: number): IEnumerable<IEnumerable<TElement>> {
+        return new Enumerable(source).permutations(size);
     }
 
     public static prepend<TElement>(source: IEnumerable<TElement>, item: TElement): IEnumerable<TElement> {

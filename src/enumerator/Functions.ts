@@ -132,6 +132,21 @@ export const chunk = <TElement>(
 }
 
 /**
+ * Returns all combinations of the elements of the sequence.
+ * @template TElement
+ * @param source The source iterable.
+ * @param size The size of the combinations. If not specified, it will return all possible combinations.
+ * @returns {IEnumerable<IEnumerable<TElement>>} A new enumerable sequence whose elements are combinations of the source sequence.
+ * @throws {InvalidArgumentException} If size is less than or equal to 0.
+ */
+export const combinations = <TElement>(
+    source: Iterable<TElement>,
+    size?: number
+): IEnumerable<IEnumerable<TElement>> => {
+    return from(source).combinations(size);
+}
+
+/**
  * Concatenates two sequences.
  * @template TElement The type of elements in the sequence.
  * @param source The first sequence.
@@ -625,6 +640,22 @@ export const partition = <TElement>(
     predicate: Predicate<TElement>
 ): [IEnumerable<TElement>, IEnumerable<TElement>] => {
     return from(source).partition(predicate);
+}
+
+/**
+ * Returns an enumerable sequence of permutations, each containing a permutation of the elements of the source sequence.
+ * @template TElement
+ * @param source The source iterable.
+ * @param size If specified, it will return only the permutations of the specified size.
+ * If not specified, it will return permutations of the size of the source sequence.
+ * @returns {IEnumerable<IEnumerable<TElement>>} An enumerable of enumerable sequences, each containing a permutation of the elements of the source sequence.
+ * @throws {InvalidArgumentException} If size is less than or equal to 0.
+ */
+export const permutations = <TElement>(
+    source: Iterable<TElement>,
+    size?: number
+): IEnumerable<IEnumerable<TElement>> => {
+    return from(source).permutations(size);
 }
 
 /**

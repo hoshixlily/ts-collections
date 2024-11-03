@@ -7,6 +7,7 @@ import {
     average,
     cast,
     chunk,
+    combinations,
     concat,
     contains,
     count,
@@ -46,6 +47,7 @@ import {
     orderByDescending,
     pairwise,
     partition,
+    permutations,
     prepend,
     PriorityQueue,
     product,
@@ -218,6 +220,57 @@ describe("Enumerable Standalone Functions", () => {
             expect(count(elementAt(chunks, 0))).to.eq(3);
             expect(count(elementAt(chunks, 1))).to.eq(3);
             expect(count(elementAt(chunks, 2))).to.eq(2);
+        });
+    });
+
+    describe("#combinations()", () => {
+        test("should return all combinations of the string", () => {
+            const sequence = "AYANA";
+            const cmb = combinations(sequence);
+            const combinationsArray = cmb.select(p => p.toArray()).orderBy(c => c.length).toArray();
+            expect(combinationsArray.length).to.eq(24);
+        });
+        test("should return all combinations of the string with a length of 1", () => {
+            const sequence = "AYANA";
+            const cmb = combinations(sequence, 1);
+            const combinationsArray = cmb.select(p => p.toArray()).orderBy(c => c.length).toArray();
+            expect(combinationsArray.length).to.eq(3);
+        });
+        test("should return all combinations of the string with a length of 2", () => {
+            const sequence = "AYANA";
+            const combinationsEnum = combinations(sequence, 2);
+            const combinationsArray = combinationsEnum.select(p => p.toArray()).orderBy(c => c.length).toArray();
+            expect(combinationsArray.length).to.eq(6);
+        });
+        test("should return all combinations of the string with a length of 3", () => {
+            const sequence = "AYANA";
+            const combinationsEnum = combinations(sequence, 3);
+            const combinationsArray = combinationsEnum.select(p => p.toArray()).orderBy(c => c.length).toArray();
+            expect(combinationsArray.length).to.eq(8);
+        });
+        it("should return all combinations of the string with a length of 4", () => {
+            const sequence = "AYANA";
+            const combinationsEnum = combinations(sequence, 4);
+            const combinationsArray = combinationsEnum.select(p => p.toArray()).orderBy(c => c.length).toArray();
+            expect(combinationsArray.length).to.eq(5);
+        });
+        it("should return all combinations of the string with a length of 5", () => {
+            const sequence = "AYANA";
+            const combinationsEnum = combinations(sequence, 5);
+            const combinationsArray = combinationsEnum.select(p => p.toArray()).orderBy(c => c.length).toArray();
+            expect(combinationsArray.length).to.eq(1);
+        });
+        it("should return all combinations of the string with a length of 6", () => {
+            const sequence = "AYANA";
+            const combinationsEnum = combinations(sequence, 6);
+            const combinationsArray = combinationsEnum.select(p => p.toArray()).orderBy(c => c.length).toArray();
+            expect(combinationsArray.length).to.eq(0);
+        });
+        it("should return all combinations of the string #2", () => {
+            const sequence = "ALICE";
+            const combinationsEnum = combinations(sequence);
+            const combinationsArray = combinationsEnum.select(p => p.toArray()).orderBy(c => c.length).toArray();
+            expect(combinationsArray.length).to.eq(32);
         });
     });
 
@@ -855,6 +908,18 @@ describe("Enumerable Standalone Functions", () => {
             const result = partition(sequence, n => n % 2 === 0);
             expect(result[0].toArray()).to.deep.equal([2, 4, 6, 8]);
             expect(result[1].toArray()).to.deep.equal([1, 3, 5, 7, 9]);
+        });
+    });
+
+    describe("#permutations()", () => {
+        test("should return all permutations of the sequence", () => {
+            const result = permutations([1, 2, 3]);
+            expect(result.select(p => p.toArray()).toArray()).to.deep.equal([[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]);
+        });
+        test("should return all permutations of the string", () => {
+            const result = permutations("RUI");
+            const perms = result.select(p => p.toArray().join(""));
+            expect(perms.toArray()).to.deep.equal(["RUI", "RIU", "URI", "UIR", "IRU", "IUR"]);
         });
     });
 

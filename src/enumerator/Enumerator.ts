@@ -132,6 +132,13 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
         return new Enumerator(() => this.chunkGenerator(size));
     }
 
+    public combinations(size?: number): IEnumerable<IEnumerable<TElement>> {
+        if (size != null && size < 0) {
+            throw new InvalidArgumentException("Size must be greater than or equal to 0.", "size");
+        }
+        return new Enumerator(() => this.combinationsGenerator(size));
+    }
+
     public concat(iterable: Iterable<TElement>): IEnumerable<TElement> {
         return new Enumerator(() => this.concatGenerator(iterable));
     }
@@ -382,6 +389,13 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
             }
         }
         return [new Enumerable(trueItems), new Enumerable(falseItems)];
+    }
+
+    public permutations(size?: number): IEnumerable<IEnumerable<TElement>> {
+        if (size != null && size < 1) {
+            throw new InvalidArgumentException("Size must be greater than 0.", "size");
+        }
+        return new Enumerator(() => this.permutationsGenerator(size));
     }
 
     public prepend(element: TElement): IEnumerable<TElement> {
@@ -733,6 +747,40 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
         }
     }
 
+    private* combinationsGenerator(size?: number): Iterable<IEnumerable<TElement>> {
+        const iterator = this[Symbol.iterator]();
+
+        let next = iterator.next();
+        if (next.done) {
+            return yield* [];
+        }
+
+        const items = new List<TElement>();
+        while (!next.done) {
+            items.add(next.value);
+            next = iterator.next();
+        }
+
+        const combinationCount = 1 << items.length;
+        const seen = new Set<string>();
+
+        for (let cx = 0; cx < combinationCount; ++cx) {
+            const combination = new List<TElement>();
+            for (let vx = 0; vx < items.length; ++vx) {
+                if ((cx & (1 << vx)) !== 0) {
+                    combination.add(items.elementAt(vx));
+                }
+            }
+            if (size == null || combination.length === size) {
+                const key = combination.aggregate((acc, cur) => acc + cur, ",");
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    yield combination;
+                }
+            }
+        }
+    }
+
     private* concatGenerator(enumerable: Iterable<TElement>): Iterable<TElement> {
         yield* this;
         yield* enumerable;
@@ -872,6 +920,29 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
             next = iterator.next();
             if (!next.done) {
                 yield resultSelector(previous.value, next.value);
+            }
+        }
+    }
+
+    private* permutationsGenerator(size?: number): Iterable<IEnumerable<TElement>> {
+        type Permutation = { processed: EnumerableSet<TElement>, remaining: EnumerableSet<TElement> };
+        const elements = this.distinct();
+        const queue = new Queue<Permutation>();
+        queue.add({processed: new EnumerableSet<TElement>(), remaining: new EnumerableSet<TElement>(elements)});
+        while (queue.length > 0) {
+            const current = queue.poll() as Permutation;
+            if (size != null && current.processed.length === size) {
+                yield current.processed;
+                continue;
+            }
+            if (size == null && current.remaining.length === 0) {
+                yield current.processed;
+                continue;
+            }
+            for (let ix = 0; ix < current.remaining.length; ++ix) {
+                const newCurrent = new EnumerableSet([...current.processed, current.remaining.elementAt(ix)]);
+                const newRemaining = new EnumerableSet([...current.remaining.take(ix), ...current.remaining.skip(ix + 1)]);
+                queue.add({processed: newCurrent, remaining: newRemaining});
             }
         }
     }

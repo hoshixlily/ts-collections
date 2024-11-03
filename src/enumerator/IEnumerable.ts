@@ -105,6 +105,16 @@ export interface IEnumerable<TElement> extends Iterable<TElement> {
     chunk(size: number): IEnumerable<IEnumerable<TElement>>;
 
     /**
+     * Returns all combinations of the elements of the sequence.
+     * The outputs will not include duplicate combinations.
+     * @template TElement
+     * @param size The size of the combinations. If not specified, it will return all possible combinations.
+     * @returns {IEnumerable<IEnumerable<TElement>>} A new enumerable sequence whose elements are combinations of the source sequence.
+     * @throws {InvalidArgumentException} If size is less than or equal to 0.
+     */
+    combinations(size?: number): IEnumerable<IEnumerable<TElement>>;
+
+    /**
      * Concatenates two sequences.
      * @template TElement
      * @param iterable The iterable sequence that will be concatenated to the first sequence.
@@ -389,6 +399,16 @@ export interface IEnumerable<TElement> extends Iterable<TElement> {
      * @returns {[IEnumerable<TElement>, IEnumerable<TElement>]} A tuple of two enumerable sequences, the first one containing the elements that satisfy the condition, and the second one containing the rest of the elements.
      */
     partition(predicate: Predicate<TElement>): [IEnumerable<TElement>, IEnumerable<TElement>];
+
+    /**
+     * Returns an enumerable sequence of permutations, each containing a permutation of the elements of the source sequence.
+     * @template TElement
+     * @param size If specified, it will return only the permutations of the specified size.
+     * If not specified, it will return permutations of the size of the source sequence.
+     * @returns {IEnumerable<IEnumerable<TElement>>} An enumerable of enumerable sequences, each containing a permutation of the elements of the source sequence.
+     * @throws {InvalidArgumentException} If size is less than or equal to 0.
+     */
+    permutations(size?: number): IEnumerable<IEnumerable<TElement>>;
 
     /**
      * Adds a value to the beginning of the sequence.

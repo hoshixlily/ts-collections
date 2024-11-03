@@ -94,6 +94,10 @@ export abstract class AbstractReadonlyDictionary<TKey, TValue> implements IReado
         return EnumerableStatic.chunk(this, size);
     }
 
+    public combinations(size?: number): IEnumerable<IEnumerable<KeyValuePair<TKey, TValue>>> {
+        return EnumerableStatic.combinations(this, size);
+    }
+
     public concat(iterable: Iterable<KeyValuePair<TKey, TValue>>): IEnumerable<KeyValuePair<TKey, TValue>> {
         return EnumerableStatic.concat(this, iterable);
     }
@@ -209,6 +213,10 @@ export abstract class AbstractReadonlyDictionary<TKey, TValue> implements IReado
 
     public partition(predicate: Predicate<KeyValuePair<TKey, TValue>>): [IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>] {
         return EnumerableStatic.partition(this, predicate);
+    }
+
+    public permutations(size?: number): IEnumerable<IEnumerable<KeyValuePair<TKey, TValue>>> {
+        return EnumerableStatic.permutations(this, size);
     }
 
     public prepend(element: KeyValuePair<TKey, TValue>): IEnumerable<KeyValuePair<TKey, TValue>> {
