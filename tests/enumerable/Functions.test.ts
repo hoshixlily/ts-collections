@@ -10,6 +10,7 @@ import {
     concat,
     contains,
     count,
+    cycle,
     defaultIfEmpty,
     Dictionary,
     distinct,
@@ -262,6 +263,18 @@ describe("Enumerable Standalone Functions", () => {
         test("should return the number of elements in the set with a predicate", () => {
             const set = new Set([1, 2, 3, 4, 5]);
             expect(count(set, n => n % 2 === 0)).to.eq(2);
+        });
+    });
+
+    describe("#cycle()", () => {
+        test("should cycle through the list 3 times", () => {
+            const list = cycle([1,2,3], 3);
+            expect(count(list)).to.eq(9);
+            expect(list.toArray()).to.deep.equal([1, 2, 3, 1, 2, 3, 1, 2, 3]);
+        });
+        test("should cycle through string 2 times", () => {
+            const list = cycle("abc", 2);
+            expect(list.toArray()).to.deep.equal(["a", "b", "c", "a", "b", "c"]);
         });
     });
 

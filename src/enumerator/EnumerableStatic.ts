@@ -85,6 +85,10 @@ export abstract class EnumerableStatic {
         return new Enumerable(source).count(predicate);
     }
 
+    public static cycle<TElement>(source: IEnumerable<TElement>, count?: number): IEnumerable<TElement> {
+        return new Enumerable(source).cycle(count);
+    }
+
     public static defaultIfEmpty<TElement>(source: IEnumerable<TElement>, value?: TElement | null): IEnumerable<TElement | null> {
         return new Enumerable(source).defaultIfEmpty(value);
     }

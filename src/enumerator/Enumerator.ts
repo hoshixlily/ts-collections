@@ -162,6 +162,10 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
         return count;
     }
 
+    public cycle(count?: number): IEnumerable<TElement> {
+        return new Enumerator(() => this.cycleGenerator(count));
+    }
+
     public defaultIfEmpty(value?: TElement | null): IEnumerable<TElement | null> {
         return new Enumerator(() => this.defaultIfEmptyGenerator(value));
     }
@@ -732,6 +736,21 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
     private* concatGenerator(enumerable: Iterable<TElement>): Iterable<TElement> {
         yield* this;
         yield* enumerable;
+    }
+
+    private* cycleGenerator(count?: number): Iterable<TElement> {
+        if (this.none()) {
+            throw new NoElementsException();
+        }
+        if (count == null) {
+            while (true) {
+                yield* this;
+            }
+        } else {
+            for (let i = 0; i < count; ++i) {
+                yield* this;
+            }
+        }
     }
 
     private* defaultIfEmptyGenerator(value?: TElement | null): Iterable<TElement | null> {

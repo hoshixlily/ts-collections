@@ -109,6 +109,10 @@ export abstract class AbstractReadonlyDictionary<TKey, TValue> implements IReado
         return EnumerableStatic.count(this, predicate);
     }
 
+    public cycle(count?: number): IEnumerable<KeyValuePair<TKey, TValue>> {
+        return EnumerableStatic.cycle(this, count);
+    }
+
     public defaultIfEmpty(value?: KeyValuePair<TKey, TValue> | null): IEnumerable<KeyValuePair<TKey, TValue> | null> {
         return EnumerableStatic.defaultIfEmpty(this, value);
     }

@@ -140,6 +140,10 @@ export class Enumerable<TElement> implements IEnumerable<TElement> {
         return this.#enumerator.count(predicate);
     }
 
+    public cycle(count?: number): IEnumerable<TElement> {
+        return this.#enumerator.cycle(count);
+    }
+
     public defaultIfEmpty(value?: TElement | null): IEnumerable<TElement | null> {
         return this.#enumerator.defaultIfEmpty(value);
     }

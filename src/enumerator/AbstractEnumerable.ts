@@ -89,6 +89,10 @@ export abstract class AbstractEnumerable<TElement> implements IEnumerable<TEleme
         return EnumerableStatic.count(this, predicate);
     }
 
+    public cycle(count?: number): IEnumerable<TElement> {
+        return EnumerableStatic.cycle(this, count);
+    }
+
     public defaultIfEmpty(value?: TElement | null): IEnumerable<TElement | null> {
         return EnumerableStatic.defaultIfEmpty(this as IEnumerable<TElement | null>, value);
     }

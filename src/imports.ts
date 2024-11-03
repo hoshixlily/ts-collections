@@ -68,6 +68,7 @@ export {
     concat,
     contains,
     count,
+    cycle,
     defaultIfEmpty,
     distinct,
     elementAt,

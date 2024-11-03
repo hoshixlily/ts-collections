@@ -121,6 +121,10 @@ export class Lookup<TKey, TElement> implements ILookup<TKey, TElement> {
         return this.#lookupTree.count(predicate);
     }
 
+    public cycle(count?: number): IEnumerable<IGroup<TKey, TElement>> {
+        return this.#lookupTree.cycle(count);
+    }
+
     public defaultIfEmpty(value?: IGroup<TKey, TElement>): IEnumerable<IGroup<TKey, TElement> | null> {
         return this.#lookupTree.defaultIfEmpty(value);
     }

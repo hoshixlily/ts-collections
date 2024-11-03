@@ -130,6 +130,17 @@ export interface IEnumerable<TElement> extends Iterable<TElement> {
     count(predicate?: Predicate<TElement>): number;
 
     /**
+     * Returns a new enumerable sequence that repeats the elements of the source sequence a specified number of times.
+     * If count is not specified, the sequence will be repeated indefinitely.
+     * If the sequence is empty, an error will be thrown.
+     * @template TElement
+     * @param count The number of times the source sequence will be repeated.
+     * @returns {IEnumerable<TElement>} A new enumerable sequence that repeats the elements of the source sequence.
+     * @throws {NoElementsException} If the source is empty.
+     */
+    cycle(count?: number): IEnumerable<TElement>;
+
+    /**
      * Returns the elements of the specified sequence or the specified value in a singleton collection if the sequence is empty.
      * @template TElement
      * @param value The value to return if the sequence is empty.

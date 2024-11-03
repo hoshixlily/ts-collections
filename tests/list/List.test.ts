@@ -307,6 +307,41 @@ describe("List", () => {
         });
     });
 
+    describe("#cycle()", () => {
+        test("should return an infinite iterable", () => {
+            const list = new List([1, 2, 3]);
+            const cycle = list.cycle();
+            const iterator = cycle[Symbol.iterator]();
+            for (let i = 0; i < 100; ++i) {
+                const value = iterator.next().value;
+                expect(value).to.eq(i % 3 + 1);
+            }
+        });
+        test("should return an iterable with 10 elements", () => {
+            const list = new List([1, 2, 3]);
+            const cycle = list.cycle(3);
+            const cycle2 = list.cycle(4);
+            const array = cycle.toArray();
+            const array2 = cycle2.toArray();
+            expect(array).to.deep.equal([1, 2, 3, 1, 2, 3, 1, 2, 3]);
+            expect(array2).to.deep.equal([1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]);
+        });
+        test("should return an iterable with 0 elements", () => {
+            const list = new List([1, 2, 3]);
+            const cycle = list.cycle(0);
+            expect(cycle.toArray()).to.deep.equal([]);
+        });
+        it("should return an empty iterable if count is less than 0", () => {
+            const list = new List([1, 2, 3]);
+            const cycle = list.cycle(-1);
+            expect(cycle.toArray()).to.deep.equal([]);
+        });
+        test("should throw error if source list is empty", () => {
+            const list = new List<number>();
+            expect(() => list.cycle().toList()).toThrowError("Sequence contains no elements.");
+        });
+    });
+
     describe("#defaultIfEmpty()", () => {
         test("should return a new IEnumerable with the default values", () => {
             const list = new List();
@@ -606,7 +641,7 @@ describe("List", () => {
         });
     });
 
-    describe("#indexOf", () => {
+    describe("#indexOf()", () => {
         const list1 = new List([Person.Alice, Person.Noemi, null, Person.Noemi2, null]);
         test("should return 2", () => {
             expect(list1.indexOf(null)).to.eq(2);
