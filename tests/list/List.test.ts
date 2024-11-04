@@ -1125,6 +1125,7 @@ describe("List", () => {
         })
         test("should throw error if size is less than 1", () => {
             const list = new List([1, 2, 3]);
+            expect(() => list.permutations(0)).toThrow("Size must be greater than 0.");
             expect(() => list.permutations(-1)).toThrow("Size must be greater than 0.");
         });
         test("should return empty list if source list is empty", () => {

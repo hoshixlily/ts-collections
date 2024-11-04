@@ -539,13 +539,11 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
         for (const item of this) {
             if (found) {
                 rest.add(item);
+            } else if (predicate(item)) {
+                span.add(item);
             } else {
-                if (predicate(item)) {
-                    span.add(item);
-                } else {
-                    found = true;
-                    rest.add(item);
-                }
+                found = true;
+                rest.add(item);
             }
         }
         return [new Enumerable(span), new Enumerable(rest)];
