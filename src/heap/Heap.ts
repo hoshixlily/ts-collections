@@ -14,7 +14,12 @@ export class Heap<TElement> extends AbstractRandomAccessCollection<TElement> {
         super((e1, e2) => (comparator ?? this.#comparator)(e1, e2) === 0);
         this.#comparator = comparator ?? this.#comparator;
         if (iterable) {
-            this.addAll(iterable);
+            // Add all elements to the heap without heapifying
+            for (const element of iterable) {
+                this.#heap.add(element);
+            }
+            // Build the heap in O(n) time
+            this.buildHeap();
         }
     }
 
@@ -56,9 +61,12 @@ export class Heap<TElement> extends AbstractRandomAccessCollection<TElement> {
     /**
      * Retrieves the element at the root of the heap without removing it.
      * @template TElement The type of elements in the heap.
-     * @returns {TElement} The element at the root of the heap.
+     * @returns {TElement|null} The element at the root of the heap, or null if the heap is empty.
      */
-    public peek(): TElement {
+    public peek(): TElement | null {
+        if (this.isEmpty()) {
+            return null;
+        }
         return this.#heap.get(0);
     }
 
@@ -107,7 +115,9 @@ export class Heap<TElement> extends AbstractRandomAccessCollection<TElement> {
      */
     public removeAll<TSource extends TElement>(collection: Iterable<TSource>): boolean {
         const result = this.#heap.removeAll(collection);
-        this.heapifyDown();
+        if (result) {
+            this.buildHeap();
+        }
         return result;
     }
 
@@ -118,8 +128,26 @@ export class Heap<TElement> extends AbstractRandomAccessCollection<TElement> {
      */
     public override removeIf(predicate: Predicate<TElement>): boolean {
         const result = this.#heap.removeIf(predicate);
-        this.heapifyDown();
+        if (result) {
+            this.buildHeap();
+        }
         return result;
+    }
+
+    /**
+     * Builds a heap from the current elements in O(n) time.
+     * This is more efficient than adding elements one by one, which takes O(n log n) time.
+     * @private
+     */
+    private buildHeap(): void {
+        const size = this.size();
+        if (size <= 1) {
+            return;
+        }
+        // Start from the last non-leaf node and heapify down each node
+        for (let i = Math.floor((size - 2) / 2); i >= 0; i--) {
+            this.heapifyDown(i);
+        }
     }
 
     /**
@@ -175,6 +203,10 @@ export class Heap<TElement> extends AbstractRandomAccessCollection<TElement> {
     }
 
     private heapifyDown(index: number = 0): void {
+        if (this.size() <= 1) {
+            return;
+        }
+
         while (this.hasLeftChild(index)) {
             let smallerChildIndex = this.getLeftChildIndex(index);
             if (this.hasRightChild(index) && this.#comparator(this.getRightChildValue(index) as TElement, this.getLeftChildValue(index) as TElement) < 0) {
@@ -189,6 +221,10 @@ export class Heap<TElement> extends AbstractRandomAccessCollection<TElement> {
     }
 
     private heapifyUp(index: number = this.size() - 1): void {
+        if (index <= 0) {
+            return;
+        }
+
         while (index > 0 && this.#comparator(this.getParentValue(index) as TElement, this.#heap.get(index)) > 0) {
             Collections.swap(this.#heap, index, this.getParentIndex(index));
             index = this.getParentIndex(index);

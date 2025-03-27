@@ -35,7 +35,7 @@ describe("Heap", () => {
             const array = [...heap]; // min heap
             expect(array).toEqual(expected);
         });
-        it("should add elements in descending order", () => {
+        test("should add elements in descending order", () => {
             const heap = new Heap<number>(Comparators.reverseOrderComparator);
             heap.add(16);
             heap.add(1210);
@@ -94,7 +94,7 @@ describe("Heap", () => {
             const heap = new Heap<number>(null, [88, 4, 26, 11, 8]);
             expect(heap.size()).toBe(5);
             const array = [...heap]; // min heap
-            expect(array).toEqual([4, 8, 26, 88, 11]);
+            expect(array).toEqual([4, 8, 26, 11, 88]);
         });
         test("should create a max heap from an iterable", () => {
             const heap = new Heap<number>(Comparators.reverseOrderComparator, [88, 4, 26, 11, 8]);
