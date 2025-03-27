@@ -1,4 +1,4 @@
-import { describe, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { Enumerable, ImmutableList, PriorityQueue, ReadonlyCollection, Stack } from "../../src/imports";
 import { List } from "../../src/list/List";
 import { EqualityComparator } from "../../src/shared/EqualityComparator";
