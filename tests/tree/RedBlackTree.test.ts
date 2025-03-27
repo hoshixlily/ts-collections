@@ -727,7 +727,7 @@ describe("RedBlackTree", () => {
         test("should end immediately if tree is empty", () => {
             const tree = new RedBlackTree([]);
             let x = 0;
-            for (const node of tree) {
+            for (const _ of tree) {
                 x = 1;
             }
             expect(x).to.eq(0);

@@ -1126,14 +1126,10 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
     }
 
     private* takeLastGenerator(count: number): IterableIterator<TElement> {
-        // Collect all elements in an array
         const allItems: Array<TElement> = [];
         for (const item of this) {
             allItems.push(item);
         }
-
-        // Yield only the last 'count' elements
-        // This avoids the O(n) shift operation for each element
         const startIndex = Math.max(0, allItems.length - count);
         for (let i = startIndex; i < allItems.length; i++) {
             yield allItems[i];

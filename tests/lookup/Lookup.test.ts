@@ -321,7 +321,7 @@ describe("Lookup", () => {
                 (group, dataItems) => ({
                     name: group.key,
                     people: group.source.toArray(),
-                    additionalInfo: dataItems.toArray()
+                    additionalInfo: dataItems!.toArray()
                 })
             );
 
@@ -357,7 +357,7 @@ describe("Lookup", () => {
                 (group, dataItems) => ({
                     name: group.key,
                     people: group.source.toArray(),
-                    additionalInfo: dataItems.toArray()
+                    additionalInfo: dataItems!.toArray()
                 })
             );
 
@@ -455,7 +455,7 @@ describe("Lookup", () => {
                 (group, data) => ({
                     name: group.key,
                     people: group.source.toArray(),
-                    favoriteColor: data.favoriteColor
+                    favoriteColor: data!.favoriteColor
                 })
             );
 
@@ -491,7 +491,7 @@ describe("Lookup", () => {
                 (group, data) => ({
                     name: group.key,
                     people: group.source.toArray(),
-                    favoriteColor: data.favoriteColor
+                    favoriteColor: data!.favoriteColor
                 })
             );
 
