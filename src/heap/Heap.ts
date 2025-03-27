@@ -40,6 +40,28 @@ export class Heap<TElement> extends AbstractRandomAccessCollection<TElement> {
     }
 
     /**
+     * Adds all elements from the specified collection to the heap.
+     * @template TSource The type of elements in the collection.
+     * @param {Iterable<TSource>} collection The collection of elements to add.
+     * @returns true if the heap was modified; otherwise, false.
+     */
+    public override addAll<TSource extends TElement>(collection: Iterable<TSource>): boolean {
+        const oldSize = this.size();
+        let added = false;
+
+        for (const element of collection) {
+            this.#heap.add(element);
+            added = true;
+        }
+
+        if (added) {
+            this.buildHeap();
+        }
+
+        return this.size() !== oldSize;
+    }
+
+    /**
      * Clears the heap.
      */
     public clear(): void {
