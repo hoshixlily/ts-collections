@@ -1158,19 +1158,22 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
     }
 
     private* unionByGenerator<TKey>(enumerable: Iterable<TElement>, keySelector: Selector<TElement, TKey>, comparator: EqualityComparator<TKey>): Iterable<TElement> {
-        const distinctList: Array<TElement> = [];
+        const seenKeys = new Map<TKey, boolean>();
         for (const source of [this, enumerable]) {
             for (const item of source) {
-                let exist = false;
-                for (const existingItem of distinctList) {
-                    if (comparator(keySelector(item), keySelector(existingItem))) {
-                        exist = true;
+                const key = keySelector(item);
+                let exists = false;
+
+                for (const seenKey of seenKeys.keys()) {
+                    if (comparator(key, seenKey)) {
+                        exists = true;
                         break;
                     }
                 }
-                if (!exist) {
+
+                if (!exists) {
                     yield item;
-                    distinctList.push(item);
+                    seenKeys.set(key, true);
                 }
             }
         }
