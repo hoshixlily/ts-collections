@@ -150,10 +150,13 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
     }
 
     public async count(predicate?: Predicate<TElement>): Promise<number> {
-        if (!predicate) {
-            return this.toArray().then(array => array.length);
-        }
         let count = 0;
+        if (!predicate) {
+            for await (const {} of this) {
+                ++count;
+            }
+            return count;
+        }
         for await (const element of this) {
             if (predicate(element)) {
                 ++count;
@@ -435,19 +438,16 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
     }
 
     public async product(selector?: Selector<TElement, number>): Promise<number> {
-        const elements: TElement[] = [];
+        let product = 1;
+        let count = 0;
 
         for await (const element of this) {
-            elements.push(element);
-        }
-
-        if (elements.length === 0) {
-            throw new NoElementsException();
-        }
-
-        let product = 1;
-        for (const element of elements) {
             product *= selector?.(element) ?? element as unknown as number;
+            ++count;
+        }
+
+        if (count === 0) {
+            throw new NoElementsException();
         }
 
         return product;
@@ -1085,20 +1085,23 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
     }
 
     private async* unionByGenerator<TKey>(enumerable: AsyncIterable<TElement>, keySelector: Selector<TElement, TKey>, comparator?: EqualityComparator<TKey>): AsyncIterable<TElement> {
-        const distinctList: TElement[] = [];
+        const seenKeys = new Map<TKey, boolean>();
         comparator ??= Comparators.equalityComparator;
         for await (const source of [this, enumerable]) {
             for await (const element of source) {
-                let exist = false;
-                for (const existingItem of distinctList) {
-                    if (comparator(keySelector(element), keySelector(existingItem))) {
-                        exist = true;
+                const key = keySelector(element);
+                let exists = false;
+
+                for (const seenKey of seenKeys.keys()) {
+                    if (comparator(key, seenKey)) {
+                        exists = true;
                         break;
                     }
                 }
-                if (!exist) {
+
+                if (!exists) {
                     yield element;
-                    distinctList.push(element);
+                    seenKeys.set(key, true);
                 }
             }
         }
