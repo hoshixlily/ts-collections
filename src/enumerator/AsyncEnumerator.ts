@@ -768,30 +768,17 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
 
         const {value: first, done} = await new AsyncEnumerator(() => iterable)[Symbol.asyncIterator]().next();
         if (done) {
-            const {value: first, done} = await new AsyncEnumerator(() => this)[Symbol.asyncIterator]().next();
-            if (done) {
-                return yield* this;
-            }
-            const firstKey = keySelector(first);
-            const keyCollection = typeof comparator(firstKey, firstKey) === "number" ? keySet : keyList;
-            for await (const element of this) {
-                const key = keySelector(element);
-                if (!keyCollection.contains(key)) {
-                    keyCollection.add(key);
-                    yield element;
-                }
-            }
-            return;
+            return yield* this;
         }
+
         const firstKey = keySelector(first);
         const keyCollection = typeof comparator(firstKey, firstKey) === "number" ? keySet : keyList;
+
         keyCollection.add(firstKey);
 
         for await (const element of iterable) {
             const key = keySelector(element);
-            if (!keyCollection.contains(key)) {
-                keyCollection.add(key);
-            }
+            keyCollection.add(key);
         }
 
         for await (const element of this) {

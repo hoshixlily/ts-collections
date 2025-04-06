@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+import { KeyValuePair } from "../../src/dictionary/KeyValuePair";
 import { AsyncEnumerable } from "../../src/enumerator/AsyncEnumerable";
 import { Enumerable, List } from "../../src/imports";
 import { IndexOutOfBoundsException } from "../../src/shared/IndexOutOfBoundsException";
@@ -56,6 +57,13 @@ describe("AsyncEnumerable", () => {
         for (let ix = 0; ix < stringList.length; ++ix) {
             await suspend(delay);
             yield stringList[ix];
+        }
+    };
+
+    const keyValuePairProducer = async function* <TKey, TValue>(pairs: Array<[TKey, TValue]>, delay: number = 1): AsyncIterable<KeyValuePair<TKey, TValue>> {
+        for (let ix = 0; ix < pairs.length; ++ix) {
+            await suspend(delay);
+            yield new KeyValuePair<TKey, TValue>(pairs[ix][0], pairs[ix][1]);
         }
     };
 
@@ -470,6 +478,47 @@ describe("AsyncEnumerable", () => {
             const result = await enumerable1.except(enumerable2, (p1, p2) => p1.age - p2.age).toArray();
             const ageCount = Enumerable.from(result).count(p => p.age <= 50);
             expect(ageCount).to.eq(0);
+        });
+    });
+
+    describe("#exceptBy()", () => {
+        test("should only have 'Alice' in the result", async () => {
+            const enumerable1 = new AsyncEnumerable(personProducer([Person.Alice, Person.Hanna]));
+            const enumerable2 = new AsyncEnumerable(personProducer([Person.Julia, Person.Hanna2]));
+            const result = enumerable1.exceptBy(enumerable2, p => p.name);
+            const resultArray = await result.toArray();
+            expect(resultArray).to.deep.equal([Person.Alice]);
+        });
+        test("should return all elements if second enumerable is empty", async () => {
+            const enumerable1 = new AsyncEnumerable(personProducer([Person.Alice, Person.Hanna]));
+            const enumerable2 = new AsyncEnumerable(personProducer([]));
+            const result = enumerable1.exceptBy(enumerable2, p => p.surname);
+            const resultArray = await result.toArray();
+            expect(resultArray).to.deep.equal([Person.Alice, Person.Hanna]);
+        });
+        test("should be empty if first enumerable is empty", async () => {
+            const enumerable1 = new AsyncEnumerable(personProducer([]));
+            const enumerable2 = new AsyncEnumerable(personProducer([Person.Alice, Person.Hanna]));
+            const result = await enumerable1.exceptBy(enumerable2, p => p.surname).toArray();
+            expect(result).to.be.empty;
+        });
+        test("should use provided comparator", async () => {
+            const LittleAlice = new Person("alice", "Rivermist", 9);
+            const enumerable1 = new AsyncEnumerable(personProducer([Person.Alice, LittleAlice, Person.Hanna]));
+            const enumerable2 = new AsyncEnumerable(personProducer([Person.Eliza, Person.Hanna2]));
+            const result = enumerable1.exceptBy(enumerable2, p => p.name, (n1, n2) => n1.toLowerCase() === n2.toLowerCase());
+            const resultArray = await result.toArray();
+            expect(resultArray).to.deep.equal([Person.Alice]);
+        });
+        test("should return elements with keys not in second enumerable", async () => {
+            const enumerable1 = new AsyncEnumerable(personProducer([
+                Person.Alice, Person.Noemi, Person.Kaori, Person.Hanna
+            ]));
+            const enumerable2 = new AsyncEnumerable(personProducer([
+                Person.Bella, Person.Emily, Person.Hanna2, Person.Julia, Person.Vanessa
+            ]));
+            const result = await enumerable1.exceptBy(enumerable2, p => p.age).toArray();
+            expect(result).to.deep.equal([Person.Alice, Person.Noemi, Person.Kaori]);
         });
     });
 
@@ -1843,6 +1892,113 @@ describe("AsyncEnumerable", () => {
             });
             const expected = [{1: "a"}, {2: "b"}, {3: "c"}, {4: "d"}, {5: "e"}];
             expect(await zipped.toArray()).to.deep.equal(expected);
+        });
+    });
+
+    describe("#toArray()", () => {
+        test("should convert enumerable to array", async () => {
+            const enumerable = new AsyncEnumerable(numberProducer(5));
+            const result = await enumerable.toArray();
+            expect(result).to.deep.equal([0, 1, 2, 3, 4]);
+        });
+
+        test("should convert enumerable of strings to array", async () => {
+            const strings = ["a", "b", "c", "d", "e"];
+            const enumerable = new AsyncEnumerable(stringProducer(strings));
+            const result = await enumerable.toArray();
+            expect(result).to.deep.equal(strings);
+        });
+
+        test("should convert enumerable of objects to array", async () => {
+            const people = [Person.Alice, Person.Noemi, Person.Kaori];
+            const enumerable = new AsyncEnumerable(personProducer(people));
+            const result = await enumerable.toArray();
+            expect(result).to.deep.equal(people);
+        });
+
+        test("should handle empty enumerable", async () => {
+            const enumerable = new AsyncEnumerable(arrayProducer([]));
+            const result = await enumerable.toArray();
+            expect(result).to.deep.equal([]);
+        });
+
+        test("should handle large collections", async () => {
+            const size = 500;
+            const enumerable = new AsyncEnumerable(numberProducer(size));
+            const result = await enumerable.toArray();
+            expect(result.length).to.equal(size);
+            expect(result[0]).to.equal(0);
+            expect(result[size - 1]).to.equal(size - 1);
+        }, { timeout: 10000 });
+
+        test("should preserve order of elements", async () => {
+            const enumerable = new AsyncEnumerable(arrayProducer([5, 3, 1, 4, 2]));
+            const result = await enumerable.toArray();
+            expect(result).to.deep.equal([5, 3, 1, 4, 2]);
+        });
+    });
+
+    describe("#toObject()", () => {
+        test("should convert enumerable to object using key and value selectors", async () => {
+            const enumerable = new AsyncEnumerable(personProducer([Person.Alice, Person.Noemi, Person.Kaori]));
+            const result = await enumerable.toObject(p => p.name, p => p.age);
+            expect(result).to.deep.equal({
+                "Alice": 23,
+                "Noemi": 29,
+                "Kaori": 10
+            });
+        });
+
+        test("should convert enumerable of KeyValuePairs to object", async () => {
+            const pairs = [
+                ["name", "John"],
+                ["age", 30],
+                ["city", "New York"]
+            ] as [string, string|number][];
+            const enumerable = new AsyncEnumerable(keyValuePairProducer(pairs));
+            const result = await enumerable.toObject(kv => kv.key, kv => kv.value);
+            expect(result).to.deep.equal({
+                "name": "John",
+                "age": 30,
+                "city": "New York"
+            });
+        });
+
+        test("should handle KeyValuePairs with default selectors", async () => {
+            const pairs = [
+                ["name", "John"],
+                ["age", 30],
+                ["city", "New York"]
+            ] as [string, string|number][];
+            const enumerable = new AsyncEnumerable(keyValuePairProducer(pairs));
+            // When item is KeyValuePair and no selectors provided, it should use key/value properties
+            const result = await enumerable.toObject(null as any, null as any);
+            expect(result).to.deep.equal({
+                "name": "John",
+                "age": 30,
+                "city": "New York"
+            });
+        });
+
+        test("should handle empty enumerable", async () => {
+            const enumerable = new AsyncEnumerable(personProducer([]));
+            const result = await enumerable.toObject(p => p.name, p => p.age);
+            expect(result).to.deep.equal({});
+        });
+
+        test("should use custom key and value selectors", async () => {
+            const enumerable = new AsyncEnumerable(numberProducer(5));
+            const result = await enumerable.toObject(
+                n => `key${n}`,
+                n => n * n
+            );
+            expect(result).to.deep.equal({
+                "key0": 0,
+                "key1": 1,
+                "key2": 4,
+                "key3": 9,
+                "key4": 16
+            });
         });
     });
 });
