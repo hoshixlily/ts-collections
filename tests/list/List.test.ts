@@ -2019,6 +2019,17 @@ describe("List", () => {
             expect(list2.get(5)).to.eq(list.get(5));
             expect(list2.get(6)).to.eq(list.get(6));
         });
+        test("should run performance test", () => {
+            const largeList = new List<number>();
+            for (let i = 0; i < 100000; i++) {
+                largeList.add(i);
+            }
+            const result = largeList.takeLast(100).toList();
+            expect(result.count()).to.eq(100);
+            expect(result.get(0)).to.eq(99900);
+            expect(result.get(99)).to.eq(99999);
+
+        });
     });
     describe("#takeWhile()", () => {
         const list = new List(["apple", "banana", "mango", "orange", "plum", "grape"]);

@@ -1558,6 +1558,15 @@ describe("AsyncEnumerable", () => {
             const result = await enumerable.takeLast(0).toArray();
             expect(result).to.deep.equal([]);
         });
+        test("should run performance test", async () => {
+            const size = 500;
+            const enumerable = new AsyncEnumerable(numberProducer(size, 0));
+
+            const result = await enumerable.takeLast(100).toArray();
+            expect(result.length).to.eq(100);
+            expect(result[0]).to.eq(size - 100);
+            expect(result[99]).to.eq(size - 1);
+        }, { timeout: 10000 });
     });
 
     describe("#takeWhile()", () => {

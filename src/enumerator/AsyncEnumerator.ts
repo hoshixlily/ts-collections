@@ -1049,14 +1049,14 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
     }
 
     private async* takeLastGenerator(count: number): AsyncIterable<TElement> {
-        const result: TElement[] = [];
+        const allItems: TElement[] = [];
         for await (const element of this) {
-            result.push(element);
-            if (result.length > count) {
-                result.shift();
-            }
+            allItems.push(element);
         }
-        yield* result;
+        const startIndex = Math.max(0, allItems.length - count);
+        for (let i = startIndex; i < allItems.length; i++) {
+            yield allItems[i];
+        }
     }
 
     private async* takeWhileGenerator(predicate: IndexedPredicate<TElement>): AsyncIterable<TElement> {
