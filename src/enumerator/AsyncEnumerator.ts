@@ -790,19 +790,43 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* groupByGenerator<TKey>(keySelector: Selector<TElement, TKey>, keyComparator: EqualityComparator<TKey>): AsyncIterableIterator<IGroup<TKey, TElement>> {
-        const groups: Array<IGroup<TKey, TElement>> = [];
+    private async* groupByGenerator<TKey>(
+        keySelector: Selector<TElement, TKey>,
+        keyComparator: EqualityComparator<TKey>
+    ): AsyncIterableIterator<IGroup<TKey, TElement>> {
+
+        const groupMap = new Map<TKey, IGroup<TKey, TElement>>();
+
+        const findExistingKeyInMap = (targetKey: TKey): TKey | undefined => {
+            for (const existingKey of groupMap.keys()) {
+                if (keyComparator(existingKey, targetKey)) {
+                    return existingKey;
+                }
+            }
+            return undefined;
+        };
+
         for await (const element of this) {
             const key = keySelector(element);
-            const group = groups.find(g => keyComparator(g.key, key));
+            let group: IGroup<TKey, TElement> | undefined;
+            const existingMapKey = findExistingKeyInMap(key);
+
+            if (existingMapKey !== undefined) {
+                group = groupMap.get(existingMapKey);
+                if (!group) {
+                    throw new NoSuchElementException(`Group with key ${existingMapKey} not found.`);
+                }
+            }
+
             if (group) {
                 (group.source as List<TElement>).add(element);
             } else {
-                const newGroup = new Group<TKey, TElement>(key, new List<TElement>([element]));
-                groups.push(newGroup);
+                const newList = new List<TElement>([element]);
+                const newGroup = new Group<TKey, TElement>(key, newList);
+                groupMap.set(key, newGroup);
             }
         }
-        yield* groups;
+        yield* groupMap.values();
     }
 
     private async* groupJoinGenerator<TInner, TKey, TResult>(inner: IAsyncEnumerable<TInner>, outerKeySelector: Selector<TElement, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TElement, IEnumerable<TInner>, TResult>, keyComparator: EqualityComparator<TKey>): AsyncIterableIterator<TResult> {

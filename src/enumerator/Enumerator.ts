@@ -888,18 +888,41 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
     }
 
     private* groupByGenerator<TKey>(keySelector: Selector<TElement, TKey>, keyComparator?: EqualityComparator<TKey>): IterableIterator<IGroup<TKey, TElement>> {
-        const groups: Array<IGroup<TKey, TElement>> = [];
+        const groupMap = new Map<TKey, IGroup<TKey, TElement>>();
+
+        const findKeyInMap = (targetKey: TKey): TKey | undefined => {
+            for (const existingKey of groupMap.keys()) {
+                if (keyComparator!(existingKey, targetKey)) { // keyComparator is guaranteed to exist here
+                    return existingKey;
+                }
+            }
+            return undefined;
+        };
+
         for (const item of this) {
             const key = keySelector(item);
-            const group = groups.find(g => keyComparator?.(g.key, key));
+            let group: IGroup<TKey, TElement> | undefined;
+            let mapKey: TKey = key;
+
+            if (keyComparator) {
+                const existingKey = findKeyInMap(key);
+                if (existingKey !== undefined) {
+                    group = groupMap.get(existingKey);
+                    mapKey = existingKey;
+                }
+            } else {
+                group = groupMap.get(key);
+            }
+
             if (group) {
                 (group.source as List<TElement>).add(item);
             } else {
-                const newGroup = new Group(key, new List([item]));
-                groups.push(newGroup);
+                const newList = new List([item]);
+                const newGroup = new Group(key, newList);
+                groupMap.set(mapKey, newGroup);
             }
         }
-        yield* groups;
+        yield* groupMap.values();
     }
 
     private* groupJoinGenerator<TInner, TKey, TResult>(innerEnumerable: IEnumerable<TInner>, outerKeySelector: Selector<TElement, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TElement, IEnumerable<TInner>, TResult>, keyComparator?: EqualityComparator<TKey>): IterableIterator<TResult> {
