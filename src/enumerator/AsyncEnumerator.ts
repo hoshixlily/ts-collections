@@ -1083,13 +1083,29 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
     }
 
     private async* takeLastGenerator(count: number): AsyncIterableIterator<TElement> {
-        const allItems: TElement[] = [];
-        for await (const element of this) {
-            allItems.push(element);
+        if (count <= 0) {
+            return;
         }
-        const startIndex = Math.max(0, allItems.length - count);
-        for (let i = startIndex; i < allItems.length; i++) {
-            yield allItems[i];
+
+        const buffer = new Array<TElement | undefined>(count);
+        let startIndex = 0;
+        let size = 0;
+
+        for await (const element of this) {
+            const nextIndex = (startIndex + size) % count;
+
+            buffer[nextIndex] = element;
+
+            if (size < count) {
+                size++;
+            } else {
+                startIndex = (startIndex + 1) % count;
+            }
+        }
+
+        for (let i = 0; i < size; i++) {
+            const readIndex = (startIndex + i) % count;
+            yield buffer[readIndex]!;
         }
     }
 
