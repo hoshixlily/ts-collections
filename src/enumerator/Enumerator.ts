@@ -1102,11 +1102,23 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
     }
 
     private* skipLastGenerator(count: number): IterableIterator<TElement> {
-        const result: Array<TElement> = [];
+        if (count <= 0) {
+            yield* this;
+            return;
+        }
+
+        const buffer: TElement[] = new Array(count);
+        let bufferSize = 0;
+        let index = 0;
+
         for (const item of this) {
-            result.push(item);
-            if (result.length > count) {
-                yield result.shift() as TElement;
+            if (bufferSize === count) {
+                yield buffer[index];
+            }
+            buffer[index] = item;
+            index = (index + 1) % count;
+            if (bufferSize < count) {
+                bufferSize++;
             }
         }
     }
@@ -1177,27 +1189,34 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
     }
 
     private* unionByGenerator<TKey>(enumerable: Iterable<TElement>, keySelector: Selector<TElement, TKey>, comparator: EqualityComparator<TKey>): IterableIterator<TElement> {
-        const seenKeys = new Map<TKey, boolean>();
         const isDefaultComparator = comparator === Comparators.equalityComparator;
+        const seenKeysSet = isDefaultComparator ? new Set<TKey>() : null;
+        const seenKeysList = isDefaultComparator ? null : new Array<TKey>();
+
         for (const source of [this, enumerable]) {
             for (const item of source) {
                 const key = keySelector(item);
                 let exists = false;
 
-                if (isDefaultComparator) {
-                    exists = seenKeys.has(key);
-                } else {
-                    for (const seenKey of seenKeys.keys()) {
+                if (seenKeysSet) {
+                    exists = seenKeysSet.has(key);
+                    if (!exists) {
+                        seenKeysSet.add(key);
+                    }
+                } else if (seenKeysList) {
+                    for (const seenKey of seenKeysList) {
                         if (comparator(key, seenKey)) {
                             exists = true;
                             break;
                         }
                     }
+                    if (!exists) {
+                        seenKeysList.push(key);
+                    }
                 }
 
                 if (!exists) {
                     yield item;
-                    seenKeys.set(key, true);
                 }
             }
         }

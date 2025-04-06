@@ -1857,6 +1857,13 @@ describe("List", () => {
             const list2 = list.skipLast(100).toList();
             expect(list2.size()).to.eq(0);
         });
+        test("should run performance test", () => {
+            const list = new List(Enumerable.range(1, 1000000));
+            const start = Date.now();
+            list.skipLast(999999).toList();
+            const end = Date.now();
+            console.log(`Performance test took ${end - start}ms`);
+        });
     });
     describe("#skipWhile()", () => {
         const list = new List([5000, 2500, 9000, 8000, 6500, 4000, 1500, 5500]);

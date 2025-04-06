@@ -1022,15 +1022,24 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
     }
 
     private async* skipLastGenerator(count: number): AsyncIterableIterator<TElement> {
-        const result: TElement[] = [];
         if (count <= 0) {
-            yield* this;
-        } else {
-            for await (const element of this) {
-                result.push(element);
-                if (result.length > count) {
-                    yield result.shift() as TElement;
-                }
+            return yield* this;
+        }
+
+        const buffer: TElement[] = new Array(count);
+        let bufferSize = 0;
+        let index = 0; 
+
+        for await (const item of this) {
+            if (bufferSize === count) {
+                yield buffer[index];
+            }
+
+            buffer[index] = item;
+            index = (index + 1) % count;
+
+            if (bufferSize < count) {
+                bufferSize++;
             }
         }
     }
