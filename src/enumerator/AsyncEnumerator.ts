@@ -662,18 +662,18 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         return new AsyncEnumerator<TResult>(() => this.zipGenerator(iterable, resultSelector));
     }
 
-    private async* appendGenerator(element: TElement): AsyncIterable<TElement> {
+    private async* appendGenerator(element: TElement): AsyncIterableIterator<TElement> {
         yield* this;
         yield element;
     }
 
-    private async* castGenerator<TResult>(): AsyncIterable<TResult> {
+    private async* castGenerator<TResult>(): AsyncIterableIterator<TResult> {
         for await (const element of this) {
             yield element as unknown as TResult;
         }
     }
 
-    private async* chunkGenerator(size: number): AsyncIterable<IEnumerable<TElement>> {
+    private async* chunkGenerator(size: number): AsyncIterableIterator<IEnumerable<TElement>> {
         const buffer: TElement[] = [];
         for await (const element of this) {
             buffer.push(element);
@@ -687,7 +687,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* combinationsGenerator(size?: number): AsyncIterable<IEnumerable<TElement>> {
+    private async* combinationsGenerator(size?: number): AsyncIterableIterator<IEnumerable<TElement>> {
         const items: TElement[] = [];
 
         for await (const item of this) {
@@ -717,12 +717,12 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* concatGenerator(other: AsyncIterable<TElement>): AsyncIterable<TElement> {
+    private async* concatGenerator(other: AsyncIterable<TElement>): AsyncIterableIterator<TElement> {
         yield* this;
         yield* other;
     }
 
-    private async* cycleGenerator(count?: number): AsyncIterable<TElement> {
+    private async* cycleGenerator(count?: number): AsyncIterableIterator<TElement> {
         const elements = [];
         for await (const item of this) {
             elements.push(item);
@@ -747,7 +747,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* defaultIfEmptyGenerator(defaultValue?: TElement | null): AsyncIterable<TElement | null> {
+    private async* defaultIfEmptyGenerator(defaultValue?: TElement | null): AsyncIterableIterator<TElement | null> {
         let hasElements = false;
         for await (const element of this) {
             hasElements = true;
@@ -758,11 +758,11 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* exceptGenerator(iterable: AsyncIterable<TElement>, comparator: EqualityComparator<TElement> |  OrderComparator<TElement>): AsyncIterable<TElement> {
+    private async* exceptGenerator(iterable: AsyncIterable<TElement>, comparator: EqualityComparator<TElement> |  OrderComparator<TElement>): AsyncIterableIterator<TElement> {
         return yield* this.exceptByGenerator(iterable, e => e, comparator);
     }
 
-    private async* exceptByGenerator<TKey>(iterable: AsyncIterable<TElement>, keySelector: Selector<TElement, TKey>, comparator: EqualityComparator<TKey> | OrderComparator<TKey>): AsyncIterable<TElement> {
+    private async* exceptByGenerator<TKey>(iterable: AsyncIterable<TElement>, keySelector: Selector<TElement, TKey>, comparator: EqualityComparator<TKey> | OrderComparator<TKey>): AsyncIterableIterator<TElement> {
         const keySet = new SortedSet<TKey>([], comparator as OrderComparator<TKey>);
         const keyList = new List<TKey>([], comparator as EqualityComparator<TKey>);
 
@@ -790,7 +790,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* groupByGenerator<TKey>(keySelector: Selector<TElement, TKey>, keyComparator: EqualityComparator<TKey>): AsyncIterable<IGroup<TKey, TElement>> {
+    private async* groupByGenerator<TKey>(keySelector: Selector<TElement, TKey>, keyComparator: EqualityComparator<TKey>): AsyncIterableIterator<IGroup<TKey, TElement>> {
         const groups: Array<IGroup<TKey, TElement>> = [];
         for await (const element of this) {
             const key = keySelector(element);
@@ -805,7 +805,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         yield* groups;
     }
 
-    private async* groupJoinGenerator<TInner, TKey, TResult>(inner: IAsyncEnumerable<TInner>, outerKeySelector: Selector<TElement, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TElement, IEnumerable<TInner>, TResult>, keyComparator: EqualityComparator<TKey>): AsyncIterable<TResult> {
+    private async* groupJoinGenerator<TInner, TKey, TResult>(inner: IAsyncEnumerable<TInner>, outerKeySelector: Selector<TElement, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TElement, IEnumerable<TInner>, TResult>, keyComparator: EqualityComparator<TKey>): AsyncIterableIterator<TResult> {
         const innerGroups = await inner.groupBy(innerKeySelector, keyComparator).toArray();
         for await (const outerElement of this) {
             const outerKey = outerKeySelector(outerElement);
@@ -814,18 +814,18 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* indexGenerator(): AsyncIterable<[number, TElement]> {
+    private async* indexGenerator(): AsyncIterableIterator<[number, TElement]> {
         let index = 0;
         for await (const element of this) {
             yield [index++, element];
         }
     }
 
-    private async* intersectGenerator(iterable: AsyncIterable<TElement>, comparator: EqualityComparator<TElement> | OrderComparator<TElement>): AsyncIterable<TElement> {
+    private async* intersectGenerator(iterable: AsyncIterable<TElement>, comparator: EqualityComparator<TElement> | OrderComparator<TElement>): AsyncIterableIterator<TElement> {
         return yield* this.intersectByGenerator(iterable, e => e, comparator);
     }
 
-    private async* intersectByGenerator<TKey>(enumerable: AsyncIterable<TElement>, keySelector: Selector<TElement, TKey>, comparator: EqualityComparator<TKey> | OrderComparator<TKey>): AsyncIterable<TElement> {
+    private async* intersectByGenerator<TKey>(enumerable: AsyncIterable<TElement>, keySelector: Selector<TElement, TKey>, comparator: EqualityComparator<TKey> | OrderComparator<TKey>): AsyncIterableIterator<TElement> {
         const keySet = new SortedSet<TKey>([], comparator as OrderComparator<TKey>);
         const keyList = new List<TKey>([], comparator as EqualityComparator<TKey>);
 
@@ -853,7 +853,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* intersperseGenerator<TSeparator = TElement>(separator: TSeparator): AsyncIterable<TElement | TSeparator> {
+    private async* intersperseGenerator<TSeparator = TElement>(separator: TSeparator): AsyncIterableIterator<TElement | TSeparator> {
         let index = 0;
         for await (const element of this) {
             if (index > 0) {
@@ -864,7 +864,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* joinGenerator<TInner, TKey, TResult>(inner: IAsyncEnumerable<TInner>, outerKeySelector: Selector<TElement, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TElement, TInner, TResult>, keyComparator: EqualityComparator<TKey>, leftJoin: boolean): AsyncIterable<TResult> {
+    private async* joinGenerator<TInner, TKey, TResult>(inner: IAsyncEnumerable<TInner>, outerKeySelector: Selector<TElement, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TElement, TInner, TResult>, keyComparator: EqualityComparator<TKey>, leftJoin: boolean): AsyncIterableIterator<TResult> {
         const innerArrayEnumerable = Enumerable.from(await inner.toArray());
         for await (const element of this) {
             const innerElements = innerArrayEnumerable.where(e => keyComparator(innerKeySelector(e), outerKeySelector(element)));
@@ -878,7 +878,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* ofTypeGenerator<TResult extends ObjectType>(type: TResult): AsyncIterable<InferredType<TResult>> {
+    private async* ofTypeGenerator<TResult extends ObjectType>(type: TResult): AsyncIterableIterator<InferredType<TResult>> {
         const isOfType = typeof type === "string"
             ? ((item: unknown) => typeof item === type) as (item: unknown) => item is InferredType<TResult>
             : (item: unknown): item is InferredType<TResult> => item instanceof (ClassType(type) as any);
@@ -889,7 +889,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* pairwiseGenerator(resultSelector: PairwiseSelector<TElement, TElement>): AsyncIterable<[TElement, TElement]> {
+    private async* pairwiseGenerator(resultSelector: PairwiseSelector<TElement, TElement>): AsyncIterableIterator<[TElement, TElement]> {
         const iterator = this[Symbol.asyncIterator]();
         let next = await iterator.next();
         while (!next.done) {
@@ -901,7 +901,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* permutationsGenerator(size?: number): AsyncIterable<IEnumerable<TElement>> {
+    private async* permutationsGenerator(size?: number): AsyncIterableIterator<IEnumerable<TElement>> {
         type Permutation = { created: EnumerableSet<TElement>, remaining: EnumerableSet<TElement> };
         const elements = await this.distinct().toArray();
         const queue = new Queue<Permutation>();
@@ -928,16 +928,16 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* prependGenerator(element: TElement): AsyncIterable<TElement> {
+    private async* prependGenerator(element: TElement): AsyncIterableIterator<TElement> {
         yield element;
         yield* this;
     }
 
-    private async* reverseGenerator(): AsyncIterable<TElement> {
+    private async* reverseGenerator(): AsyncIterableIterator<TElement> {
         yield* (await this.toArray()).reverse();
     }
 
-    private async* scanGenerator<TAccumulate>(accumulator: Accumulator<TElement, TAccumulate>, seed?: TAccumulate): AsyncIterable<TAccumulate> {
+    private async* scanGenerator<TAccumulate>(accumulator: Accumulator<TElement, TAccumulate>, seed?: TAccumulate): AsyncIterableIterator<TAccumulate> {
         let accumulatedValue: TAccumulate | null = null;
         if (seed == null) {
             let index = 0;
@@ -963,27 +963,27 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* selectGenerator<TResult>(selector: IndexedSelector<TElement, TResult>): AsyncIterable<TResult> {
+    private async* selectGenerator<TResult>(selector: IndexedSelector<TElement, TResult>): AsyncIterableIterator<TResult> {
         let index = 0;
         for await (const element of this) {
             yield selector(element, index++);
         }
     }
 
-    private async* selectManyGenerator<TResult>(selector: IndexedSelector<TElement, Iterable<TResult>>): AsyncIterable<TResult> {
+    private async* selectManyGenerator<TResult>(selector: IndexedSelector<TElement, Iterable<TResult>>): AsyncIterableIterator<TResult> {
         let index = 0;
         for await (const element of this) {
             yield* selector(element, index++);
         }
     }
 
-    private async* shuffleGenerator(): AsyncIterable<TElement> {
+    private async* shuffleGenerator(): AsyncIterableIterator<TElement> {
         const array = await this.toArray();
         Collections.shuffle(array);
         yield* array;
     }
 
-    private async* skipGenerator(count: number): AsyncIterable<TElement> {
+    private async* skipGenerator(count: number): AsyncIterableIterator<TElement> {
         let index = 0;
         if (count <= 0) {
             yield* this;
@@ -997,7 +997,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* skipLastGenerator(count: number): AsyncIterable<TElement> {
+    private async* skipLastGenerator(count: number): AsyncIterableIterator<TElement> {
         const result: TElement[] = [];
         if (count <= 0) {
             yield* this;
@@ -1011,7 +1011,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* skipWhileGenerator(predicate: IndexedPredicate<TElement>): AsyncIterable<TElement> {
+    private async* skipWhileGenerator(predicate: IndexedPredicate<TElement>): AsyncIterableIterator<TElement> {
         let index = 0;
         let skipEnded = false;
         for await (const element of this) {
@@ -1026,7 +1026,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    public async* stepGenerator(step: number): AsyncIterable<TElement> {
+    public async* stepGenerator(step: number): AsyncIterableIterator<TElement> {
         let index = 0;
         for await (const element of this) {
             if (index % step === 0) {
@@ -1036,7 +1036,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* takeGenerator(count: number): AsyncIterable<TElement> {
+    private async* takeGenerator(count: number): AsyncIterableIterator<TElement> {
         let index = 0;
         for await (const element of this) {
             if (index < count) {
@@ -1048,7 +1048,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* takeLastGenerator(count: number): AsyncIterable<TElement> {
+    private async* takeLastGenerator(count: number): AsyncIterableIterator<TElement> {
         const allItems: TElement[] = [];
         for await (const element of this) {
             allItems.push(element);
@@ -1059,7 +1059,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* takeWhileGenerator(predicate: IndexedPredicate<TElement>): AsyncIterable<TElement> {
+    private async* takeWhileGenerator(predicate: IndexedPredicate<TElement>): AsyncIterableIterator<TElement> {
         let index = 0;
         for await (const element of this) {
             if (predicate(element, index)) {
@@ -1071,7 +1071,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* unionByGenerator<TKey>(enumerable: AsyncIterable<TElement>, keySelector: Selector<TElement, TKey>, comparator?: EqualityComparator<TKey>): AsyncIterable<TElement> {
+    private async* unionByGenerator<TKey>(enumerable: AsyncIterable<TElement>, keySelector: Selector<TElement, TKey>, comparator?: EqualityComparator<TKey>): AsyncIterableIterator<TElement> {
         const seenKeys = new Map<TKey, boolean>();
         comparator ??= Comparators.equalityComparator;
 
@@ -1100,11 +1100,11 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* unionGenerator(iterable: AsyncIterable<TElement>, comparator?: EqualityComparator<TElement>): AsyncIterable<TElement> {
+    private async* unionGenerator(iterable: AsyncIterable<TElement>, comparator?: EqualityComparator<TElement>): AsyncIterableIterator<TElement> {
         yield* this.unionByGenerator(iterable, element => element, comparator);
     }
 
-    private async* whereGenerator(predicate: IndexedPredicate<TElement>): AsyncIterable<TElement> {
+    private async* whereGenerator(predicate: IndexedPredicate<TElement>): AsyncIterableIterator<TElement> {
         let index = 0;
         for await (const d of this) {
             if (predicate(d, index)) {
@@ -1114,7 +1114,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* windowsGenerator(size: number): AsyncIterable<IEnumerable<TElement>> {
+    private async* windowsGenerator(size: number): AsyncIterableIterator<IEnumerable<TElement>> {
         const iterator = this[Symbol.asyncIterator]();
         const window = new List<TElement>();
         for (let item = await iterator.next(); !item.done; item = await iterator.next()) {
@@ -1126,7 +1126,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
         }
     }
 
-    private async* zipGenerator<TSecond, TResult = [TElement, TSecond]>(iterable: AsyncIterable<TSecond>, zipper?: Zipper<TElement, TSecond, TResult>): AsyncIterable<TResult> {
+    private async* zipGenerator<TSecond, TResult = [TElement, TSecond]>(iterable: AsyncIterable<TSecond>, zipper?: Zipper<TElement, TSecond, TResult>): AsyncIterableIterator<TResult> {
         const iterator1 = this[Symbol.asyncIterator]();
         const iterator2 = iterable[Symbol.asyncIterator]();
         let next1 = await iterator1.next();
