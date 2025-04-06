@@ -1155,15 +1155,20 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
 
     private* unionByGenerator<TKey>(enumerable: Iterable<TElement>, keySelector: Selector<TElement, TKey>, comparator: EqualityComparator<TKey>): Iterable<TElement> {
         const seenKeys = new Map<TKey, boolean>();
+        const isDefaultComparator = comparator === Comparators.equalityComparator;
         for (const source of [this, enumerable]) {
             for (const item of source) {
                 const key = keySelector(item);
                 let exists = false;
 
-                for (const seenKey of seenKeys.keys()) {
-                    if (comparator(key, seenKey)) {
-                        exists = true;
-                        break;
+                if (isDefaultComparator) {
+                    exists = seenKeys.has(key);
+                } else {
+                    for (const seenKey of seenKeys.keys()) {
+                        if (comparator(key, seenKey)) {
+                            exists = true;
+                            break;
+                        }
                     }
                 }
 

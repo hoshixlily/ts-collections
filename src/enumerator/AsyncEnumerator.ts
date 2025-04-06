@@ -1074,15 +1074,21 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
     private async* unionByGenerator<TKey>(enumerable: AsyncIterable<TElement>, keySelector: Selector<TElement, TKey>, comparator?: EqualityComparator<TKey>): AsyncIterable<TElement> {
         const seenKeys = new Map<TKey, boolean>();
         comparator ??= Comparators.equalityComparator;
+
+        const isDefaultComparator = comparator === Comparators.equalityComparator;
         for await (const source of [this, enumerable]) {
             for await (const element of source) {
                 const key = keySelector(element);
                 let exists = false;
 
-                for (const seenKey of seenKeys.keys()) {
-                    if (comparator(key, seenKey)) {
-                        exists = true;
-                        break;
+                if (isDefaultComparator) {
+                    exists = seenKeys.has(key);
+                } else {
+                    for (const seenKey of seenKeys.keys()) {
+                        if (comparator(key, seenKey)) {
+                            exists = true;
+                            break;
+                        }
                     }
                 }
 
@@ -1095,19 +1101,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
     }
 
     private async* unionGenerator(iterable: AsyncIterable<TElement>, comparator?: EqualityComparator<TElement>): AsyncIterable<TElement> {
-        const collection = comparator ? new List<TElement>([], comparator) : new EnumerableSet<TElement>();
-        for await (const element of this) {
-            if (!collection.contains(element)) {
-                collection.add(element);
-                yield element;
-            }
-        }
-        for await (const element of iterable) {
-            if (!collection.contains(element)) {
-                collection.add(element);
-                yield element;
-            }
-        }
+        yield* this.unionByGenerator(iterable, element => element, comparator);
     }
 
     private async* whereGenerator(predicate: IndexedPredicate<TElement>): AsyncIterable<TElement> {
