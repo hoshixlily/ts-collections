@@ -1,9 +1,6 @@
 import { EqualityComparator } from "../../shared/EqualityComparator";
 
-export const findOrCreateGroupEntry = <TInner, TKey>(lookupStore: Array<{
-    key: TKey;
-    group: TInner[]
-}>, key: TKey, keyCompare: EqualityComparator<TKey>): TInner[] => {
+export const findOrCreateGroupEntry = <TInner, TKey>(lookupStore: Array<GroupJoinLookup<TKey, TInner>>, key: TKey, keyCompare: EqualityComparator<TKey>): TInner[] => {
     for (const entry of lookupStore) {
         if (keyCompare(entry.key, key)) {
             return entry.group;
@@ -14,10 +11,7 @@ export const findOrCreateGroupEntry = <TInner, TKey>(lookupStore: Array<{
     return newGroup;
 }
 
-export const findGroupInStore = <TInner, TKey>(lookupStore: ReadonlyArray<{
-    key: TKey;
-    group: TInner[]
-}>, key: TKey, keyCompare: EqualityComparator<TKey>): ReadonlyArray<TInner> | null => {
+export const findGroupInStore = <TInner, TKey>(lookupStore: ReadonlyArray<GroupJoinLookup<TKey, TInner>>, key: TKey, keyCompare: EqualityComparator<TKey>): ReadonlyArray<TInner> | null => {
     for (const entry of lookupStore) {
         if (keyCompare(entry.key, key)) {
             return entry.group;
@@ -25,3 +19,5 @@ export const findGroupInStore = <TInner, TKey>(lookupStore: ReadonlyArray<{
     }
     return null;
 }
+
+export type GroupJoinLookup<TKey, TInner> = { key: TKey; group: TInner[] }

@@ -1206,6 +1206,99 @@ describe("List", () => {
             expect(joinList.toArray()).to.deep.equal(expectedOutput);
             expect(joinList.toList().length).to.eq(5);
         });
+
+        test("should return empty result when outer collection is empty", () => {
+            const emptyStudents = new List<Student>();
+            const joinedData = emptyStudents.join(schools, st => st.schoolId, sc => sc.id,
+                (student, school) => `${student.name} ${student.surname} :: ${school?.name}`);
+            expect(joinedData.any()).to.be.false;
+            expect(joinedData.count()).to.eq(0);
+        });
+
+        test("should return empty result when inner collection is empty", () => {
+            const emptySchools = new List<School>();
+            const joinedData = students.join(emptySchools, st => st.schoolId, sc => sc.id,
+                (student, school) => `${student.name} ${student.surname} :: ${school?.name}`);
+            expect(joinedData.any()).to.be.false;
+            expect(joinedData.count()).to.eq(0);
+        });
+
+        test("should return results for left join when inner collection is empty", () => {
+            const emptySchools = new List<School>();
+            const joinedData = students.join(emptySchools, st => st.schoolId, sc => sc.id,
+                (student, school) => [student.name, school?.name], undefined, true);
+            expect(joinedData.count()).to.eq(5);
+            for (const item of joinedData) {
+                expect(item[1]).to.be.undefined;
+            }
+        });
+
+        test("should handle custom equality comparator", () => {
+            // Custom comparator that considers school IDs equal if they have the same parity (odd/even)
+            const parityComparator = (id1: number, id2: number) => id1 % 2 === id2 % 2;
+
+            const joinedData = students.join(schools, st => st.schoolId, sc => sc.id,
+                (student, school) => `${student.name} at ${school?.name}`, parityComparator);
+
+            // All students should match with at least one school since we're matching by parity
+            expect(joinedData.count()).to.be.greaterThan(0);
+
+            // Lucrezia (schoolId 4) should match with schools with even IDs (2)
+            const lucreziaMatches = joinedData.where(s => s.startsWith("Lucrezia")).count();
+            expect(lucreziaMatches).to.be.greaterThan(0);
+        });
+
+        test("should handle null keys in outer collection", () => {
+            const studentsWithNull = new List([
+                desiree,
+                new Student(600, "Student", "WithNullSchool", null as unknown as number)
+            ]);
+
+            const joinedData = studentsWithNull.join(schools, st => st.schoolId, sc => sc.id,
+                (student, school) => [student.name, school?.name]);
+
+            // Only Desiree should match
+            expect(joinedData.count()).to.eq(1);
+            expect(joinedData.first()[0]).to.eq("Desireé");
+        });
+
+        test("should handle null keys in inner collection", () => {
+            const schoolsWithNull = new List([
+                school1,
+                new School(null as unknown as number, "School with null ID")
+            ]);
+
+            const joinedData = students.join(schoolsWithNull, st => st.schoolId, sc => sc.id,
+                (student, school) => [student.name, school?.name]);
+
+            // Only Priscilla should match with school1
+            expect(joinedData.count()).to.eq(1);
+            expect(joinedData.first()[0]).to.eq("Priscilla");
+        });
+
+        test("should handle complex join scenarios with multiple matches", () => {
+            // Create schools with duplicate IDs
+            const schoolsWithDuplicates = new List([
+                new School(1, "Elementary School 1"),
+                new School(1, "Elementary School 2"),
+                new School(2, "High School 1"),
+                new School(2, "High School 2"),
+                new School(3, "University 1"),
+                new School(3, "University 2")
+            ]);
+
+            const joinedData = students.join(schoolsWithDuplicates, st => st.schoolId, sc => sc.id,
+                (student, school) => `${student.name} at ${school?.name}`);
+
+            // Each student should match with two schools (except Lucrezia)
+            expect(joinedData.count()).to.eq(8); // 4 students * 2 schools each
+
+            // Check that Priscilla matches with both Elementary Schools
+            const priscillaMatches = joinedData.where(s => s.startsWith("Priscilla")).toArray();
+            expect(priscillaMatches.length).to.eq(2);
+            expect(priscillaMatches).to.include("Priscilla at Elementary School 1");
+            expect(priscillaMatches).to.include("Priscilla at Elementary School 2");
+        });
     });
 
     describe("#last()", () => {

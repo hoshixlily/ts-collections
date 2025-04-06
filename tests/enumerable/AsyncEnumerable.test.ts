@@ -1092,6 +1092,37 @@ describe("AsyncEnumerable", () => {
             expect(joinedData.length).to.eq(5);
             expect(joinedData).to.deep.equal(expectedOutput);
         });
+
+        test("should return empty result when inner collection is empty", async () => {
+            const emptySchoolProducer = async function* (): AsyncIterableIterator<School> {
+                // Empty producer
+            };
+            const studentsEnumerable = new AsyncEnumerable(studentProducer());
+            const emptySchoolsEnumerable = new AsyncEnumerable(emptySchoolProducer());
+
+            const joinedData = await studentsEnumerable.join(emptySchoolsEnumerable, st => st.schoolId, sc => sc.id,
+                (student, school) => `${student.name} ${student.surname} :: ${school?.name}`).toArray();
+
+            expect(joinedData.length).to.eq(0);
+        });
+
+        test("should handle custom equality comparator", async () => {
+            // Custom comparator that considers school IDs equal if they have the same parity (odd/even)
+            const parityComparator = (id1: number, id2: number) => id1 % 2 === id2 % 2;
+
+            const schoolsEnumerable = new AsyncEnumerable(schoolProducer());
+            const studentsEnumerable = new AsyncEnumerable(studentProducer());
+
+            const joinedData = await studentsEnumerable.join(schoolsEnumerable, st => st.schoolId, sc => sc.id,
+                (student, school) => `${student.name} at ${school?.name}`, parityComparator).toArray();
+
+            // All students should match with at least one school since we're matching by parity
+            expect(joinedData.length).to.be.greaterThan(0);
+
+            // Lucrezia (schoolId 4) should match with schools with even IDs (2)
+            const lucreziaMatches = joinedData.filter(s => s.startsWith("Lucrezia")).length;
+            expect(lucreziaMatches).to.be.greaterThan(0);
+        });
     });
 
     describe("#last()", () => {

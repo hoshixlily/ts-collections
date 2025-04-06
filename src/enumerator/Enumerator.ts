@@ -46,7 +46,8 @@ import { PairwiseSelector } from "../shared/PairwiseSelector";
 import { Predicate } from "../shared/Predicate";
 import { Selector } from "../shared/Selector";
 import { Zipper } from "../shared/Zipper";
-import { findGroupInStore, findOrCreateGroupEntry } from "./helpers/groupJoinHelpers";
+import { findGroupInStore, findOrCreateGroupEntry, GroupJoinLookup } from "./helpers/groupJoinHelpers";
+import { buildGroupsSync, processOuterElement } from "./helpers/joinHelpers";
 import { permutationsGenerator } from "./helpers/permutationsGenerator";
 
 export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
@@ -929,7 +930,7 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
 
     private* groupJoinGenerator<TInner, TKey, TResult>(innerEnumerable: IEnumerable<TInner>, outerKeySelector: Selector<TElement, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TElement, IEnumerable<TInner>, TResult>, keyComparator?: EqualityComparator<TKey>): IterableIterator<TResult> {
         const keyCompare = keyComparator ?? Comparators.equalityComparator;
-        const lookupStore: Array<{ key: TKey; group: TInner[] }> = [];
+        const lookupStore: Array<GroupJoinLookup<TKey, TInner>> = [];
 
         for (const innerElement of innerEnumerable) {
             const innerKey = innerKeySelector(innerElement);
@@ -993,15 +994,19 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
 
     private* joinGenerator<TInner, TKey, TResult>(innerEnumerable: IEnumerable<TInner>, outerKeySelector: Selector<TElement, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TElement, TInner, TResult>, keyComparator?: EqualityComparator<TKey>, leftJoin?: boolean): IterableIterator<TResult> {
         const keyCompare = keyComparator ?? Comparators.equalityComparator;
-        for (const element of this) {
-            const innerItems = innerEnumerable.where(innerElement => keyCompare(outerKeySelector(element), innerKeySelector(innerElement)));
-            if (leftJoin && !innerItems.any()) {
-                yield resultSelector(element, null);
-            } else {
-                for (const innerItem of innerItems) {
-                    yield resultSelector(element, innerItem);
-                }
-            }
+        const effectiveLeftJoin = leftJoin ?? false;
+        const groups = buildGroupsSync(innerEnumerable, innerKeySelector, keyCompare);
+
+        for (const outerElement of this) {
+            const outerKey = outerKeySelector(outerElement);
+            yield* processOuterElement(
+                outerElement,
+                outerKey,
+                groups,
+                keyCompare,
+                resultSelector,
+                effectiveLeftJoin
+            );
         }
     }
 

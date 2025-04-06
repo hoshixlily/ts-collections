@@ -33,7 +33,8 @@ import { PairwiseSelector } from "../shared/PairwiseSelector";
 import { Predicate } from "../shared/Predicate";
 import { Selector } from "../shared/Selector";
 import { Zipper } from "../shared/Zipper";
-import { findGroupInStore, findOrCreateGroupEntry } from "./helpers/groupJoinHelpers";
+import { findGroupInStore, findOrCreateGroupEntry, GroupJoinLookup } from "./helpers/groupJoinHelpers";
+import { buildGroupsAsync, JoinGroup, processOuterElement } from "./helpers/joinHelpers";
 import { permutationsGenerator } from "./helpers/permutationsGenerator";
 
 export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
@@ -831,7 +832,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
 
     private async* groupJoinGenerator<TInner, TKey, TResult>(inner: IAsyncEnumerable<TInner>, outerKeySelector: Selector<TElement, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TElement, IEnumerable<TInner>, TResult>, keyComparator: EqualityComparator<TKey>): AsyncIterableIterator<TResult> {
         const keyCompare = keyComparator ?? Comparators.equalityComparator;
-        const lookupStore: Array<{ key: TKey; group: TInner[] }> = [];
+        const lookupStore: Array<GroupJoinLookup<TKey, TInner>> = [];
 
         for await (const innerElement of inner) {
             const innerKey = innerKeySelector(innerElement);
@@ -897,16 +898,30 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
     }
 
     private async* joinGenerator<TInner, TKey, TResult>(inner: IAsyncEnumerable<TInner>, outerKeySelector: Selector<TElement, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TElement, TInner, TResult>, keyComparator: EqualityComparator<TKey>, leftJoin: boolean): AsyncIterableIterator<TResult> {
-        const innerArrayEnumerable = Enumerable.from(await inner.toArray());
-        for await (const element of this) {
-            const innerElements = innerArrayEnumerable.where(e => keyComparator(innerKeySelector(e), outerKeySelector(element)));
-            if (leftJoin && !innerElements.any()) {
-                yield resultSelector(element, null);
-            } else {
-                for await (const innerElement of innerElements) {
-                    yield resultSelector(element, innerElement);
-                }
+        const keyCompare = keyComparator ?? Comparators.equalityComparator;
+        const effectiveLeftJoin = leftJoin ?? false;
+
+        let groups: JoinGroup<TKey, TInner>[] = [];
+        try {
+            groups = await buildGroupsAsync(inner, innerKeySelector, keyCompare);
+        } catch(error) {
+            throw error;
+        }
+
+        try {
+            for await (const outerElement of this) {
+                const outerKey = outerKeySelector(outerElement);
+                yield* processOuterElement(
+                    outerElement,
+                    outerKey,
+                    groups,
+                    keyCompare,
+                    resultSelector,
+                    effectiveLeftJoin
+                );
             }
+        } catch (error) {
+            throw error;
         }
     }
 
