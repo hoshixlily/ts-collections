@@ -1413,6 +1413,19 @@ describe("List", () => {
             const perms = list.permutations().select(p => p.toArray()).toArray();
             expect(perms).to.deep.equal([[]]);
         });
+        test("should return empty list if there are no distinct elements", () => {
+            const list = new List([1, 1, 1]);
+            const perms = list.permutations().select(p => p.toArray()).toArray();
+            expect(perms).to.deep.equal([[1]]);
+        });
+        test("should measure the time taken to generate permutations", () => {
+            const list = Enumerable.range(1, 9).toList();
+            const startTime = performance.now();
+            const perms = list.permutations().select(p => p.toArray()).toArray();
+            const endTime = performance.now();
+            console.log(`Time taken to generate permutations: ${endTime - startTime} ms`);
+            expect(perms.length).to.eq(362880);
+        },  {timeout: 10000});
     });
 
     describe("#prepend()", () => {

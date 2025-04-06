@@ -46,6 +46,7 @@ import { PairwiseSelector } from "../shared/PairwiseSelector";
 import { Predicate } from "../shared/Predicate";
 import { Selector } from "../shared/Selector";
 import { Zipper } from "../shared/Zipper";
+import { permutationsGenerator } from "./helpers/permutationsGenerator";
 
 export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
 
@@ -1018,26 +1019,8 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
     }
 
     private* permutationsGenerator(size?: number): IterableIterator<IEnumerable<TElement>> {
-        type Permutation = { processed: EnumerableSet<TElement>, remaining: EnumerableSet<TElement> };
-        const elements = this.distinct();
-        const queue = new Queue<Permutation>();
-        queue.add({processed: new EnumerableSet<TElement>(), remaining: new EnumerableSet<TElement>(elements)});
-        while (queue.length > 0) {
-            const current = queue.poll() as Permutation;
-            if (size != null && current.processed.length === size) {
-                yield current.processed;
-                continue;
-            }
-            if (size == null && current.remaining.length === 0) {
-                yield current.processed;
-                continue;
-            }
-            for (let ix = 0; ix < current.remaining.length; ++ix) {
-                const newCurrent = new EnumerableSet([...current.processed, current.remaining.elementAt(ix)]);
-                const newRemaining = new EnumerableSet([...current.remaining.take(ix), ...current.remaining.skip(ix + 1)]);
-                queue.add({processed: newCurrent, remaining: newRemaining});
-            }
-        }
+        const distinctElements = Array.from(this.distinct());
+        yield* permutationsGenerator(distinctElements, size);
     }
 
     private* prependGenerator(item: TElement): IterableIterator<TElement> {

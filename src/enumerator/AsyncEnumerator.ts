@@ -3,7 +3,6 @@ import {
     AsyncEnumerable,
     Collections,
     Enumerable,
-    EnumerableSet,
     Group,
     IAsyncEnumerable,
     IEnumerable,
@@ -11,7 +10,6 @@ import {
     IOrderedAsyncEnumerable,
     List,
     OrderedAsyncEnumerator,
-    Queue,
     SortedSet
 } from "../imports";
 import { Accumulator } from "../shared/Accumulator";
@@ -35,6 +33,7 @@ import { PairwiseSelector } from "../shared/PairwiseSelector";
 import { Predicate } from "../shared/Predicate";
 import { Selector } from "../shared/Selector";
 import { Zipper } from "../shared/Zipper";
+import { permutationsGenerator } from "./helpers/permutationsGenerator";
 
 export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
 
@@ -926,30 +925,8 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
     }
 
     private async* permutationsGenerator(size?: number): AsyncIterableIterator<IEnumerable<TElement>> {
-        type Permutation = { created: EnumerableSet<TElement>, remaining: EnumerableSet<TElement> };
-        const elements = await this.distinct().toArray();
-        const queue = new Queue<Permutation>();
-        queue.add({created: new EnumerableSet<TElement>(), remaining: new EnumerableSet<TElement>(elements)});
-
-        while (queue.length > 0) {
-            const current = queue.poll() as Permutation;
-
-            if (size != null && current.created.length === size) {
-                yield current.created;
-                continue;
-            }
-
-            if (size == null && current.remaining.length === 0) {
-                yield current.created;
-                continue;
-            }
-
-            for (let ix = 0; ix < current.remaining.length; ++ix) {
-                const newCurrent = new EnumerableSet([...current.created, current.remaining.elementAt(ix)]);
-                const newRemaining = new EnumerableSet([...current.remaining.take(ix), ...current.remaining.skip(ix + 1)]);
-                queue.add({created: newCurrent, remaining: newRemaining});
-            }
-        }
+        const distinctElements = await this.distinct().toArray();
+        yield* permutationsGenerator(distinctElements, size);
     }
 
     private async* prependGenerator(element: TElement): AsyncIterableIterator<TElement> {
@@ -1028,7 +1005,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
 
         const buffer: TElement[] = new Array(count);
         let bufferSize = 0;
-        let index = 0; 
+        let index = 0;
 
         for await (const item of this) {
             if (bufferSize === count) {
