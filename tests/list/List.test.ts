@@ -807,6 +807,7 @@ describe("List", () => {
         const lucrezia = new Student(500, "Lucrezia", "Volpe", 4);
         const schools = new List([school1, school2, school3, school4]);
         const students = new List([desiree, apolline, giselle, priscilla, lucrezia]);
+
         test("should join and group by school id", () => {
             const joinedData = schools.groupJoin(students, sc => sc.id, st => st.schoolId,
                 (school, students) => {
@@ -832,6 +833,155 @@ describe("List", () => {
                 "Students of Academy: "
             ];
             expect(finalOutput).to.deep.equal(expectedOutput);
+        });
+
+        test("should handle empty inner collection", () => {
+            const emptyStudents = new List<Student>();
+            const joinedData = schools.groupJoin(emptyStudents, sc => sc.id, st => st.schoolId,
+                (school, students) => {
+                    return new SchoolStudents(school.id, students?.toList() ?? new List<Student>());
+                });
+
+            const result = joinedData.toArray();
+            expect(result.length).to.equal(4);
+
+            // All schools should have empty student lists
+            for (const schoolStudents of result) {
+                expect(schoolStudents.students.size()).to.equal(0);
+            }
+        });
+
+        test("should handle empty outer collection", () => {
+            const emptySchools = new List<School>();
+            const joinedData = emptySchools.groupJoin(students, sc => sc.id, st => st.schoolId,
+                (school, students) => {
+                    return new SchoolStudents(school.id, students?.toList() ?? new List<Student>());
+                });
+
+            const result = joinedData.toArray();
+            expect(result.length).to.equal(0);
+        });
+
+        test("should handle no matches between collections", () => {
+            const unrelatedSchools = new List([
+                new School(10, "Music School"),
+                new School(11, "Art School")
+            ]);
+
+            const joinedData = unrelatedSchools.groupJoin(students, sc => sc.id, st => st.schoolId,
+                (school, students) => {
+                    return new SchoolStudents(school.id, students?.toList() ?? new List<Student>());
+                });
+
+            const result = joinedData.toArray();
+            expect(result.length).to.equal(2);
+
+            // All schools should have empty student lists
+            for (const schoolStudents of result) {
+                expect(schoolStudents.students.size()).to.equal(0);
+            }
+        });
+
+        test("should handle custom equality comparator", () => {
+            // Create a custom comparator that considers school IDs equal if they have the same parity (odd/even)
+            const parityComparator = (id1: number, id2: number) => (id1 % 2) === (id2 % 2);
+
+            const joinedData = schools.groupJoin(students, sc => sc.id, st => st.schoolId,
+                (school, students) => {
+                    return new SchoolStudents(school.id, students?.toList() ?? new List<Student>());
+                }, parityComparator);
+
+            const result = joinedData.toArray();
+
+            // School 1 (odd) should match students with school IDs 1 and 3 (odd)
+            const school1Students = result.find(ss => ss.schoolId === 1)?.students.toArray() ?? [];
+            expect(school1Students.length).to.equal(2);
+            expect(school1Students.map(s => s.id)).to.have.members([100, 400]);
+
+            // School 2 (even) should match students with school IDs 2 and 4 (even)
+            const school2Students = result.find(ss => ss.schoolId === 2)?.students.toArray() ?? [];
+            expect(school2Students.length).to.equal(3);
+            expect(school2Students.map(s => s.id)).to.have.members([200, 300, 500]);
+
+            // School 3 (odd) should match students with school IDs 1 and 3 (odd)
+            const school3Students = result.find(ss => ss.schoolId === 3)?.students.toArray() ?? [];
+            expect(school3Students.length).to.equal(2);
+            expect(school3Students.map(s => s.id)).to.have.members([100, 400]);
+
+            // School 5 (odd) should match students with school IDs 1 and 3 (odd)
+            const school5Students = result.find(ss => ss.schoolId === 5)?.students.toArray() ?? [];
+            expect(school5Students.length).to.equal(2);
+            expect(school5Students.map(s => s.id)).to.have.members([100, 400]);
+        });
+
+        test("should handle different key selectors", () => {
+            // Use a string key selector that converts the ID to a string
+            const joinedData = schools.groupJoin(students, sc => sc.id.toString(), st => st.schoolId.toString(),
+                (school, students) => {
+                    return new SchoolStudents(school.id, students?.toList() ?? new List<Student>());
+                });
+
+            const result = joinedData.toArray();
+            expect(result.length).to.equal(4);
+
+            // Verify the same grouping as the original test
+            const school1Students = result.find(ss => ss.schoolId === 1)?.students.toArray() ?? [];
+            expect(school1Students.length).to.equal(1);
+            expect(school1Students[0].id).to.equal(400);
+
+            const school2Students = result.find(ss => ss.schoolId === 2)?.students.toArray() ?? [];
+            expect(school2Students.length).to.equal(2);
+            expect(school2Students.map(s => s.id)).to.have.members([200, 300]);
+
+            const school3Students = result.find(ss => ss.schoolId === 3)?.students.toArray() ?? [];
+            expect(school3Students.length).to.equal(1);
+            expect(school3Students[0].id).to.equal(100);
+
+            const school5Students = result.find(ss => ss.schoolId === 5)?.students.toArray() ?? [];
+            expect(school5Students.length).to.equal(0);
+        });
+
+        test("should handle null keys", () => {
+            // Create students with null school IDs
+            const studentWithNullSchool1 = new Student(600, "Student", "WithNullSchool1", null as any);
+            const studentWithNullSchool2 = new Student(700, "Student", "WithNullSchool2", null as any);
+
+            // Create a school with null ID
+            const schoolWithNullId = new School(null as any, "Null ID School");
+
+            const schoolsWithNull = new List([...schools.toArray(), schoolWithNullId]);
+            const studentsWithNull = new List([...students.toArray(), studentWithNullSchool1, studentWithNullSchool2]);
+
+            const joinedData = schoolsWithNull.groupJoin(studentsWithNull, sc => sc.id, st => st.schoolId,
+                (school, students) => {
+                    return new SchoolStudents(school.id, students?.toList() ?? new List<Student>());
+                });
+
+            const result = joinedData.toArray();
+            expect(result.length).to.equal(5);
+
+            // The null ID school should match students with null school IDs
+            const nullSchoolStudents = result.find(ss => ss.schoolId === null)?.students.toArray() ?? [];
+            expect(nullSchoolStudents.length).to.equal(2);
+            expect(nullSchoolStudents.map(s => s.id)).to.have.members([600, 700]);
+        });
+
+        test("should handle complex result selector", () => {
+            // Use a more complex result selector that creates a formatted string
+            const joinedData = schools.groupJoin(students, sc => sc.id, st => st.schoolId,
+                (school, students) => {
+                    const studentCount = students!.count();
+                    const studentNames = students!.select(s => `${s.name} ${s.surname}`).toArray().join(", ");
+                    return `${school.name} (${studentCount} students): ${studentCount > 0 ? studentNames : "No students"}`;
+                });
+
+            const result = joinedData.toArray();
+            expect(result.length).to.equal(4);
+
+            expect(result).to.include("Elementary School (1 students): Priscilla Necci");
+            expect(result).to.include("High School (2 students): Apolline Bruyere, Giselle García");
+            expect(result).to.include("University (1 students): Desireé Moretti");
+            expect(result).to.include("Academy (0 students): No students");
         });
     });
 

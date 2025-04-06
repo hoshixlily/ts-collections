@@ -46,6 +46,7 @@ import { PairwiseSelector } from "../shared/PairwiseSelector";
 import { Predicate } from "../shared/Predicate";
 import { Selector } from "../shared/Selector";
 import { Zipper } from "../shared/Zipper";
+import { findGroupInStore, findOrCreateGroupEntry } from "./helpers/groupJoinHelpers";
 import { permutationsGenerator } from "./helpers/permutationsGenerator";
 
 export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
@@ -928,9 +929,18 @@ export class Enumerator<TElement> implements IOrderedEnumerable<TElement> {
 
     private* groupJoinGenerator<TInner, TKey, TResult>(innerEnumerable: IEnumerable<TInner>, outerKeySelector: Selector<TElement, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TElement, IEnumerable<TInner>, TResult>, keyComparator?: EqualityComparator<TKey>): IterableIterator<TResult> {
         const keyCompare = keyComparator ?? Comparators.equalityComparator;
+        const lookupStore: Array<{ key: TKey; group: TInner[] }> = [];
+
+        for (const innerElement of innerEnumerable) {
+            const innerKey = innerKeySelector(innerElement);
+            const group = findOrCreateGroupEntry(lookupStore, innerKey, keyCompare);
+            group.push(innerElement);
+        }
+
         for (const element of this) {
-            const joinedEntries = innerEnumerable.where(innerElement => keyCompare(outerKeySelector(element), innerKeySelector(innerElement)));
-            yield resultSelector(element, joinedEntries);
+            const outerKey = outerKeySelector(element);
+            const joinedEntries = findGroupInStore(lookupStore, outerKey, keyCompare);
+            yield resultSelector(element, Enumerable.from(joinedEntries ?? []));
         }
     }
 

@@ -706,6 +706,188 @@ describe("AsyncEnumerable", () => {
             ];
             expect(finalOutput).to.deep.equal(expectedOutput);
         });
+
+        test("should handle empty outer collection", {timeout: 5000}, async () => {
+            const emptySchoolsProducer = async function* (): AsyncIterableIterator<School> {
+                yield* [];
+            };
+            const schoolsEnumerable = new AsyncEnumerable(emptySchoolsProducer());
+            const studentsEnumerable = new AsyncEnumerable(studentProducer());
+
+            const joinedData = schoolsEnumerable.groupJoin(studentsEnumerable, sc => sc.id, st => st.schoolId,
+                (school, students) => {
+                    return new SchoolStudents(school.id, students?.toList() ?? new List<Student>());
+                });
+
+            const finalData = await joinedData.toArray();
+            expect(finalData).to.be.empty;
+        });
+
+        test("should handle empty inner collection", {timeout: 5000}, async () => {
+            const emptyStudentsProducer = async function* (): AsyncIterableIterator<Student> {
+                yield* [];
+            };
+            const schoolsEnumerable = new AsyncEnumerable(schoolProducer());
+            const studentsEnumerable = new AsyncEnumerable(emptyStudentsProducer());
+
+            const joinedData = schoolsEnumerable.groupJoin(studentsEnumerable, sc => sc.id, st => st.schoolId,
+                (school, students) => {
+                    return new SchoolStudents(school.id, students?.toList() ?? new List<Student>());
+                });
+
+            const finalData = await joinedData.toArray();
+            expect(finalData).to.have.lengthOf(schools.length);
+
+            // All schools should have empty student lists
+            for (const schoolStudents of finalData) {
+                expect(schoolStudents.students.size()).to.equal(0);
+            }
+        });
+
+        test("should handle no matching elements between collections", {timeout: 5000}, async () => {
+            const nonMatchingStudents: Student[] = [
+                new Student(100, "Desireé", "Moretti", 10),
+                new Student(200, "Apolline", "Bruyere", 20),
+                new Student(300, "Giselle", "García", 30)
+            ];
+
+            const nonMatchingStudentsProducer = async function* (): AsyncIterableIterator<Student> {
+                for (const student of nonMatchingStudents) {
+                    await suspend(100);
+                    yield student;
+                }
+            };
+
+            const schoolsEnumerable = new AsyncEnumerable(schoolProducer());
+            const studentsEnumerable = new AsyncEnumerable(nonMatchingStudentsProducer());
+
+            const joinedData = schoolsEnumerable.groupJoin(studentsEnumerable, sc => sc.id, st => st.schoolId,
+                (school, students) => {
+                    return new SchoolStudents(school.id, students?.toList() ?? new List<Student>());
+                });
+
+            const finalData = await joinedData.toArray();
+            expect(finalData).to.have.lengthOf(schools.length);
+
+            // All schools should have empty student lists
+            for (const schoolStudents of finalData) {
+                expect(schoolStudents.students.size()).to.equal(0);
+            }
+        });
+
+        test("should use custom key comparator", {timeout: 5000}, async () => {
+            // Create students with string IDs that match school IDs when converted to strings
+            const stringIdStudents: Student[] = [
+                new Student(100, "Student1", "Surname1", 1),
+                new Student(200, "Student2", "Surname2", 2),
+                new Student(300, "Student3", "Surname3", 3)
+            ];
+
+            const stringIdStudentsProducer = async function* (): AsyncIterableIterator<Student> {
+                for (const student of stringIdStudents) {
+                    await suspend(100);
+                    yield student;
+                }
+            };
+
+            const schoolsEnumerable = new AsyncEnumerable(schoolProducer());
+            const studentsEnumerable = new AsyncEnumerable(stringIdStudentsProducer());
+
+            // Use a custom comparator that compares school.id with the first digit of student.id
+            const joinedData = schoolsEnumerable.groupJoin(
+                studentsEnumerable,
+                sc => sc.id,
+                st => Math.floor(st.id / 100), // Extract first digit (1, 2, 3)
+                (school, students) => {
+                    return new SchoolStudents(school.id, students?.toList() ?? new List<Student>());
+                },
+                (schoolId, studentFirstDigit) => schoolId === studentFirstDigit
+            );
+
+            const finalData = await joinedData.toArray();
+
+            // Verify each school has the correct number of students
+            const schoolId1 = finalData.find(ss => ss.schoolId === 1);
+            const schoolId2 = finalData.find(ss => ss.schoolId === 2);
+            const schoolId3 = finalData.find(ss => ss.schoolId === 3);
+            const schoolId5 = finalData.find(ss => ss.schoolId === 5);
+
+            expect(schoolId1?.students.size()).to.equal(1);
+            expect(schoolId2?.students.size()).to.equal(1);
+            expect(schoolId3?.students.size()).to.equal(1);
+            expect(schoolId5?.students.size()).to.equal(0);
+        });
+
+        test("should work with complex key selectors", {timeout: 5000}, async () => {
+            const schoolsEnumerable = new AsyncEnumerable(schoolProducer());
+            const studentsEnumerable = new AsyncEnumerable(studentProducer());
+
+            // Use complex key selectors that combine multiple properties
+            const joinedData = schoolsEnumerable.groupJoin(
+                studentsEnumerable,
+                school => ({ id: school.id, nameLength: school.name.length }),
+                student => ({ id: student.schoolId, nameLength: student.name.length }),
+                (school, students) => {
+                    return {
+                        schoolId: school.id,
+                        schoolName: school.name,
+                        studentCount: students!.count(),
+                        students: students!.toList()
+                    };
+                },
+                (schoolKey, studentKey) => schoolKey.id === studentKey.id
+            );
+
+            const finalData = await joinedData.toArray();
+
+            // Verify the results - should be the same as the basic join by ID
+            expect(finalData).to.have.lengthOf(schools.length);
+
+            // Check that each school has the correct number of students
+            const schoolCounts = new Map<number, number>();
+            for (const school of finalData) {
+                schoolCounts.set(school.schoolId, school.studentCount);
+            }
+
+            expect(schoolCounts.get(1)).to.equal(1); // Elementary School has 1 student
+            expect(schoolCounts.get(2)).to.equal(2); // High School has 2 students
+            expect(schoolCounts.get(3)).to.equal(1); // University has 1 student
+            expect(schoolCounts.get(5)).to.equal(0); // Academy has 0 students
+        });
+
+        test("should work with different result selector patterns", {timeout: 5000}, async () => {
+            const schoolsEnumerable = new AsyncEnumerable(schoolProducer());
+            const studentsEnumerable = new AsyncEnumerable(studentProducer());
+
+            // Use a result selector that creates a simple object with arrays instead of collections
+            const joinedData = schoolsEnumerable.groupJoin(
+                studentsEnumerable,
+                sc => sc.id,
+                st => st.schoolId,
+                (school, students) => {
+                    return {
+                        school: school,
+                        studentNames: students!.select(s => `${s.name} ${s.surname}`).toArray()
+                    };
+                }
+            );
+
+            const finalData = await joinedData.toArray();
+            expect(finalData).to.have.lengthOf(schools.length);
+
+            // Find the High School entry and verify it has the correct student names
+            const highSchool = finalData.find(item => item.school.id === 2);
+            expect(highSchool).to.not.be.undefined;
+            expect(await highSchool?.studentNames).to.have.members([
+                "Apolline Bruyere",
+                "Giselle García"
+            ]);
+
+            // Find the Academy entry and verify it has no students
+            const academy = finalData.find(item => item.school.id === 5);
+            expect(academy).to.not.be.undefined;
+            expect(await academy?.studentNames).to.be.empty;
+        });
     });
 
     describe("#index()", () => {

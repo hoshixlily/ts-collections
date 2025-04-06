@@ -33,6 +33,7 @@ import { PairwiseSelector } from "../shared/PairwiseSelector";
 import { Predicate } from "../shared/Predicate";
 import { Selector } from "../shared/Selector";
 import { Zipper } from "../shared/Zipper";
+import { findGroupInStore, findOrCreateGroupEntry } from "./helpers/groupJoinHelpers";
 import { permutationsGenerator } from "./helpers/permutationsGenerator";
 
 export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
@@ -829,11 +830,19 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
     }
 
     private async* groupJoinGenerator<TInner, TKey, TResult>(inner: IAsyncEnumerable<TInner>, outerKeySelector: Selector<TElement, TKey>, innerKeySelector: Selector<TInner, TKey>, resultSelector: JoinSelector<TElement, IEnumerable<TInner>, TResult>, keyComparator: EqualityComparator<TKey>): AsyncIterableIterator<TResult> {
-        const innerGroups = await inner.groupBy(innerKeySelector, keyComparator).toArray();
-        for await (const outerElement of this) {
-            const outerKey = outerKeySelector(outerElement);
-            const innerGroup = innerGroups.find(g => keyComparator(g.key, outerKey));
-            yield resultSelector(outerElement, innerGroup?.source ?? Enumerable.empty<TInner>());
+        const keyCompare = keyComparator ?? Comparators.equalityComparator;
+        const lookupStore: Array<{ key: TKey; group: TInner[] }> = [];
+
+        for await (const innerElement of inner) {
+            const innerKey = innerKeySelector(innerElement);
+            const group = findOrCreateGroupEntry(lookupStore, innerKey, keyCompare);
+            group.push(innerElement);
+        }
+
+        for await (const element of this) {
+            const outerKey = outerKeySelector(element);
+            const joinedEntries = findGroupInStore(lookupStore, outerKey, keyCompare);
+            yield resultSelector(element, Enumerable.from(joinedEntries ?? []));
         }
     }
 
@@ -944,7 +953,7 @@ export class AsyncEnumerator<TElement> implements IAsyncEnumerable<TElement> {
             let index = 0;
             for await (const element of this) {
                 if (index === 0) {
-                    accumulatedValue = element as TAccumulate;
+                    accumulatedValue = element as unknown as TAccumulate;
                     yield accumulatedValue;
                 } else {
                     accumulatedValue = accumulator(accumulatedValue as TAccumulate, element);
