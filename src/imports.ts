@@ -39,6 +39,7 @@ export { ImmutableList } from "./list/ImmutableList";
 export type { ITree, TraverseType } from "./tree/ITree";
 export { AbstractTree } from "./tree/AbstractTree";
 export { RedBlackTree } from "./tree/RedBlackTree";
+export { BTree } from "./tree/BTree";
 export type { IDictionary } from "./dictionary/IDictionary";
 export type { IReadonlyDictionary } from "./dictionary/IReadonlyDictionary";
 export type { IImmutableDictionary } from "./dictionary/IImmutableDictionary";
