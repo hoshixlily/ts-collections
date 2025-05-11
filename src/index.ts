@@ -60,6 +60,7 @@ export {
     RedBlackTree,
     SortedDictionary,
     SortedSet,
+    SplayTree,
     Stack,
     aggregate,
     aggregateBy,
